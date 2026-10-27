@@ -171,7 +171,7 @@
             margin-top: 1px;
         }
 
-        /* Tarjeta imponente estilo Placa Informativa para Guardia (Borde armónico) */
+        /* Tarjeta imponente estilo Placa Informativa para Guardia */
         .guard-plaque-card {
             background: linear-gradient(145deg, #0f1d32, #132845);
             border: 1px solid var(--card-border);
@@ -189,30 +189,38 @@
             color: var(--am-text);
             font-size: 11px;
             font-weight: 800;
-            padding: 3px 10px;
+            padding: 4px 12px;
             border-radius: 6px;
-            margin-bottom: 6px;
+            margin-bottom: 8px;
             text-transform: uppercase;
+            letter-spacing: 0.3px;
         }
 
         .plaque-name {
-            font-size: 18px;
+            font-size: 21px;
             font-weight: 900;
             color: #fff;
-            margin-bottom: 4px;
+            margin-bottom: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
 
         .plaque-sector {
-            font-size: 13px;
-            font-weight: 900;
-            color: #38bdf8;
-            background: rgba(56, 189, 248, 0.12);
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--text-muted);
+            background: rgba(255, 255, 255, 0.05);
             padding: 4px 10px;
-            border-radius: 6px;
+            border-radius: 5px;
             display: inline-block;
-            margin-bottom: 10px;
+            margin-bottom: 12px;
             letter-spacing: 0.5px;
-            border: 1px solid rgba(56, 189, 248, 0.3);
+            border: 1px solid var(--card-border);
+        }
+        
+        .plaque-sector strong {
+            color: var(--accent-blue);
+            font-weight: 800;
         }
 
         .plaque-info-box {
@@ -220,7 +228,7 @@
             border: 1px solid var(--card-border);
             border-radius: 8px;
             padding: 8px;
-            margin-bottom: 10px;
+            margin-bottom: 12px;
             font-size: 13px;
             font-weight: 700;
             color: var(--text-main);
@@ -309,12 +317,13 @@
         }
 
         .sup-info .sup-name {
-            font-size: 12px;
-            font-weight: 800;
+            font-size: 13px;
+            font-weight: 900;
             color: var(--text-main);
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
+            text-transform: uppercase;
         }
 
         .sup-info .sup-area {
@@ -687,10 +696,11 @@
                 html += `</div><div id="rowsSupervisorsContainer">`;
 
                 supervisorsList.forEach(sup => {
+                    let supNameUpper = sup.name.toUpperCase();
                     html += `
                         <div class="supervisor-row" style="grid-template-columns: ${colWidths};">
                             <div class="sup-info">
-                                <div class="sup-name">${sup.name}</div>
+                                <div class="sup-name">${supNameUpper}</div>
                                 <div class="sup-area">${sup.area}</div>
                                 <div class="sup-contact-icons">
                                     <a href="https://wa.me/${sup.phone}" target="_blank" class="contact-btn" title="Enviar WhatsApp">
@@ -729,26 +739,41 @@
                 document.getElementById('lblSubSemana').innerText = daysArr.length > 1 ? `Bloque fin de semana / Guardia` : `Modo técnico (Día actual)`;
 
                 if (daysArr.length > 1) {
-                    // Agrupar qué días trabaja cada supervisor en este bloque
+                    // Agrupar qué días trabaja cada supervisor en este bloque y ordenar por fecha
                     let supervisorSchedules = {};
 
                     supervisorsList.forEach(sup => {
-                        let workingDaysText = [];
+                        let workingDaysList = [];
                         daysArr.forEach(dateStr => {
                             let dayData = rawSchedule[dateStr] || {};
                             let val = dayData[sup.key] || "";
                             if (val === "G" || val === "AM" || val === "PM") {
                                 let fObj = availableDates.find(d => d.dateStr === dateStr);
                                 if (fObj) {
-                                    workingDaysText.push(`${fObj.dayName} ${fObj.dayNum} ${fObj.monthName}`);
+                                    workingDaysList.push({
+                                        dateStr: dateStr,
+                                        text: `${fObj.dayName} ${fObj.dayNum} ${fObj.monthName}`
+                                    });
                                 }
                             }
                         });
 
-                        if (workingDaysText.length > 0) {
+                        if (workingDaysList.length > 0) {
+                            // Construir texto legible agrupando o listando los días
+                            let daysTextFormatted = "";
+                            if (workingDaysList.length === 1) {
+                                daysTextFormatted = workingDaysList[0].text;
+                            } else if (workingDaysList.length === 2) {
+                                daysTextFormatted = `${workingDaysList[0].text} Y ${workingDaysList[1].text}`;
+                            } else {
+                                let texts = workingDaysList.map(d => d.text);
+                                let last = texts.pop();
+                                daysTextFormatted = `${texts.join(", ")} Y ${last}`;
+                            }
+
                             supervisorSchedules[sup.key] = {
                                 supervisor: sup,
-                                daysText: workingDaysText.join(" y ")
+                                daysText: `${daysTextFormatted} • AM + PM`
                             };
                         }
                     });
@@ -756,11 +781,12 @@
                     let plaquesHtml = '';
                     Object.values(supervisorSchedules).forEach(item => {
                         let sup = item.supervisor;
+                        let supNameUpper = sup.name.toUpperCase();
                         plaquesHtml += `
                             <div class="guard-plaque-card">
                                 <div class="plaque-day-badge">${item.daysText}</div>
-                                <div class="plaque-name">${sup.name}</div>
-                                <div class="plaque-sector">SECTOR: EVENTOS + REDES</div>
+                                <div class="plaque-name">${supNameUpper}</div>
+                                <div class="plaque-sector">SECTOR: <strong>EVENTOS + REDES</strong></div>
                                 <div class="plaque-info-box">
                                     <span>Celular:</span> ${sup.cleanPhone}<br>
                                     <span>Correo:</span> ${sup.email}
@@ -796,10 +822,11 @@
                     html += `</div><div id="rowsSupervisorsContainer">`;
 
                     supervisorsList.forEach(sup => {
+                        let supNameUpper = sup.name.toUpperCase();
                         html += `
                             <div class="supervisor-row" style="grid-template-columns: ${colWidths};">
                                 <div class="sup-info">
-                                    <div class="sup-name">${sup.name}</div>
+                                    <div class="sup-name">${supNameUpper}</div>
                                     <div class="sup-area">${sup.area}</div>
                                     <div class="sup-contact-icons">
                                         <a href="https://wa.me/${sup.phone}" target="_blank" class="contact-btn" title="Enviar WhatsApp">
