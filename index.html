@@ -399,7 +399,7 @@
             <button class="nav-arrow" onclick="navigate(1)">&#10095;</button>
         </div>
 
-        <!-- CONTENEDOR DINÁMICO: PLACA IMPONENTE O GRILLA NORMAL -->
+        <!-- CONTENEDOR DINÁMICO -->
         <div id="appContainer"></div>
 
         <footer>Sierras Chicas • Panel Operativo</footer>
@@ -580,6 +580,7 @@
             renderApp();
         }
 
+        // Lógica inteligente y dinámica para bloques de fin de semana y feriados extendidos con "G"
         function getDaysToDisplay() {
             if (isSupervisorMode) {
                 let d = new Date(baseWeekDate);
@@ -600,47 +601,56 @@
                 let targetDateStr = currentItem.dateStr;
                 let p = targetDateStr.split('-');
                 let targetDate = new Date(p[0], p[1] - 1, p[2]);
-                let dayOfWeek = targetDate.getDay(); 
+                let dayOfWeek = targetDate.getDay(); // 0: Dom, 6: Sáb, 1-5: Lun-Vie
 
-                if (dayOfWeek >= 1 && dayOfWeek <= 5) {
+                // Si es Lunes a Viernes y NO tiene guardia (G), muestra estrictamente 1 día
+                let hasTodayGuard = rawSchedule[targetDateStr] && Object.values(rawSchedule[targetDateStr]).includes("G");
+                if (dayOfWeek >= 1 && dayOfWeek <= 5 && !hasTodayGuard) {
                     return [targetDateStr];
                 }
 
-                let activeDays = [];
-                if (dayOfWeek === 6) {
-                    let satKey = targetDateStr;
-                    let sunDate = new Date(targetDate); sunDate.setDate(targetDate.getDate() + 1);
-                    let sunKey = formatDateKey(sunDate);
-                    
-                    activeDays = [satKey];
-                    if(availableDates.some(d => d.dateStr === sunKey)) activeDays.push(sunKey);
+                // Si es fin de semana (Sáb/Dom) o hay feriado/guardia conectada: expandimos dinámicamente el bloque
+                // Buscamos hacia atrás y hacia adelante todos los días contiguos que tengan turnos de fin de semana o Guardia (G)
+                let blockDays = [];
+                let scanDate = new Date(targetDate);
+                
+                // Recorremos hacia atrás hasta 3 días para capturar viernes o feriados previos con G
+                let backwardDays = [];
+                for (let i = 1; i <= 3; i++) {
+                    let prevD = new Date(targetDate);
+                    prevD.setDate(targetDate.getDate() - i);
+                    let pKey = formatDateKey(prevD);
+                    let isWeekend = (prevD.getDay() === 0 || prevD.getDay() === 6);
+                    let hasG = rawSchedule[pKey] && Object.values(rawSchedule[pKey]).includes("G");
+                    if (isWeekend || hasG) {
+                        backwardDays.unshift(pKey);
+                    } else {
+                        break;
+                    }
+                }
 
-                    let friDate = new Date(targetDate); friDate.setDate(targetDate.getDate() - 1);
-                    let friKey = formatDateKey(friDate);
-                    if(rawSchedule[friKey] && Object.values(rawSchedule[friKey]).includes("G")) {
-                        if(availableDates.some(d => d.dateStr === friKey)) activeDays.unshift(friKey);
+                // Recorremos hacia adelante hasta 3 días para capturar lunes, martes o feriados siguientes con G
+                let forwardDays = [];
+                for (let i = 1; i <= 3; i++) {
+                    let nextD = new Date(targetDate);
+                    nextD.setDate(targetDate.getDate() + i);
+                    let nKey = formatDateKey(nextD);
+                    let isWeekend = (nextD.getDay() === 0 || nextD.getDay() === 6);
+                    let hasG = rawSchedule[nKey] && Object.values(rawSchedule[nKey]).includes("G");
+                    if (isWeekend || hasG) {
+                        forwardDays.push(nKey);
+                    } else {
+                        break;
                     }
-                    let monDate = new Date(targetDate); monDate.setDate(targetDate.getDate() + 2);
-                    let monKey = formatDateKey(monDate);
-                    if(rawSchedule[monKey] && Object.values(rawSchedule[monKey]).includes("G")) {
-                        if(availableDates.some(d => d.dateStr === monKey)) activeDays.push(monKey);
-                    }
-                    return activeDays;
-                } else if (dayOfWeek === 0) {
-                    let satDate = new Date(targetDate); satDate.setDate(targetDate.getDate() - 1);
-                    let satKey = formatDateKey(satDate);
-                    let sunKey = targetDateStr;
-                    
-                    activeDays = [];
-                    if(availableDates.some(d => d.dateStr === satKey)) activeDays.push(satKey);
-                    activeDays.push(sunKey);
+                }
 
-                    let monDate = new Date(targetDate); monDate.setDate(targetDate.getDate() + 1);
-                    let monKey = formatDateKey(monDate);
-                    if(rawSchedule[monKey] && Object.values(rawSchedule[monKey]).includes("G")) {
-                        if(availableDates.some(d => d.dateStr === monKey)) activeDays.push(monKey);
-                    }
-                    return activeDays;
+                // Unimos todo el bloque dinámico ordenado cronológicamente
+                let combined = [...backwardDays, targetDateStr, ...forwardDays];
+                // Filtramos solo los días que existan en la planilla y eliminamos duplicados
+                let uniqueDays = [...new Set(combined)].filter(dStr => availableDates.some(d => d.dateStr === dStr));
+
+                if (uniqueDays.length >= 2 || hasTodayGuard) {
+                    return uniqueDays;
                 }
 
                 return [targetDateStr];
@@ -657,7 +667,6 @@
                 document.getElementById('lblRangoFechas').innerText = `MODO SUPERVISOR (SEMANA)`;
                 document.getElementById('lblSubSemana').innerText = `Auditoría activa`;
                 
-                // MODO SUPERVISOR: Muestra la grilla completa con los 4 supervisores
                 let colWidths = `115px ` + `repeat(${daysArr.length}, 1fr)`;
                 let html = `<div class="unified-card">
                     <div class="days-header-grid" id="headerGridDays" style="grid-template-columns: ${colWidths};">
@@ -711,31 +720,41 @@
                 container.innerHTML = html;
 
             } else {
-                // MODO TÉCNICO: Si es un bloque múltiple (fin de semana o guardia extendida), detectamos quiénes trabajan
+                // MODO TÉCNICO: Si es un bloque múltiple (fin de semana o feriado extendido)
                 let currentItem = availableDates[currentIndex];
                 document.getElementById('lblRangoFechas').innerText = currentItem ? `${currentItem.dayNum} ${currentItem.monthName}` : "FECHA";
                 document.getElementById('lblSubSemana').innerText = daysArr.length > 1 ? `Bloque fin de semana / Guardia` : `Modo técnico (Día actual)`;
 
                 if (daysArr.length > 1) {
-                    // Filtrar supervisores que tengan al menos un turno activo (AM, PM o G) en este bloque
+                    // Filtrar supervisores que tengan turno de Guardia ("G") en este bloque
                     let activeSupervisors = supervisorsList.filter(sup => {
                         return daysArr.some(dateStr => {
                             let dayData = rawSchedule[dateStr] || {};
-                            let val = dayData[sup.key] || "";
-                            return val === "AM" || val === "PM" || val === "G";
+                            return dayData[sup.key] === "G";
                         });
                     });
 
-                    if (activeSupervisors.length === 0) activeSupervisors = supervisorsList; // Fallback
+                    // Si por alguna razón no detecta "G", toma los que tengan AM/PM en el bloque
+                    if (activeSupervisors.length === 0) {
+                        activeSupervisors = supervisorsList.filter(sup => {
+                            return daysArr.some(dateStr => {
+                                let dayData = rawSchedule[dateStr] || {};
+                                let val = dayData[sup.key] || "";
+                                return val === "AM" || val === "PM";
+                            });
+                        });
+                    }
+
+                    if (activeSupervisors.length === 0) activeSupervisors = [supervisorsList[0]];
 
                     let plaquesHtml = '';
                     activeSupervisors.forEach(sup => {
                         plaquesHtml += `
                             <div class="guard-plaque-card">
-                                <div class="plaque-header">Supervisor de Guardia / Operación</div>
+                                <div class="plaque-header">SUPERVISOR DE GUARDIA / OPERACIÓN</div>
                                 <div class="plaque-name">${sup.name}</div>
-                                <div class="plaque-sector">Sector: ${sup.area}</div>
-                                <div class="plaque-phone-box">📱 Cel: +${sup.phone}</div>
+                                <div class="plaque-sector">SECTOR: EVENTOS + REDES</div>
+                                <div class="plaque-phone-box">Cel: +${sup.phone}</div>
                                 <div class="plaque-actions">
                                     <a href="https://wa.me/${sup.phone}" target="_blank" class="plaque-btn">
                                         <svg viewBox="0 0 24 24" fill="#25D366"><path d="M17.472 14.382c-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.096 3.2 5.077 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.84 9.84 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.41 0 0 5.41 0 12.053c0 2.11.553 4.162 1.604 5.971L0 24l6.143-1.605a11.83 11.83 0 005.905 1.585h.005c6.64 0 12.05-5.41 12.05-12.05a11.9 11.9 0 00-3.488-8.413z"/></svg>
@@ -751,7 +770,7 @@
                     container.innerHTML = plaquesHtml;
 
                 } else {
-                    // Modo técnico normal de 1 día (Lunes a Viernes): Muestra la grilla de ese día
+                    // Modo técnico normal de 1 día (Lunes a Viernes)
                     let colWidths = `115px repeat(1, 1fr)`;
                     let html = `<div class="unified-card">
                         <div class="days-header-grid" id="headerGridDays" style="grid-template-columns: ${colWidths};">
