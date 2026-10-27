@@ -354,7 +354,7 @@
                 <!-- Dinámico -->
             </div>
             <div id="rowsSupervisorsContainer">
-                <div style="text-align:center; padding: 20px; color:var(--text-muted);">Sincronizando con Google Apps Script...</div>
+                <div style="text-align:center; padding: 20px; color:var(--text-muted);">Sincronizando turnos...</div>
             </div>
         </div>
 
@@ -398,6 +398,9 @@
                 const rows = await response.json();
                 parseSheetRows(rows);
                 
+                // Guardar en memoria local del navegador (Cache de respaldo)
+                localStorage.setItem('cached_rows', JSON.stringify(rows));
+
                 if (availableDates.length > 0) {
                     let todayKey = formatDateKey(new Date());
                     let found = availableDates.find(d => d.dateStr === todayKey);
@@ -405,19 +408,22 @@
                         baseDate = parseDateKey(availableDates[0].dateStr);
                     }
                 }
-                
                 renderApp();
             } catch (error) {
-                console.error("Error al cargar desde Apps Script:", error);
-                document.getElementById('rowsSupervisorsContainer').innerHTML = 
-                    `<div style="text-align:center; padding:15px; color:#f87171; font-size:11px;">Error al conectar con Apps Script.</div>`;
+                console.warn("Fallo temporal al conectar con Apps Script, usando caché local...", error);
+                let cached = localStorage.getItem('cached_rows');
+                if (cached) {
+                    parseSheetRows(JSON.parse(cached));
+                    renderApp();
+                } else {
+                    document.getElementById('rowsSupervisorsContainer').innerHTML = 
+                        `<div style="text-align:center; padding:15px; color:#f87171; font-size:11px;">Error de conexión temporal. Reintente en unos segundos.</div>`;
+                }
             }
         }
 
         function parseSheetRows(rows) {
             if (!rows || rows.length < 2) return;
-
-            // Fila 0 tiene las cabeceras (fechas)
             const headers = rows[0];
             availableDates = [];
 
@@ -431,7 +437,6 @@
                 }
             }
 
-            // Procesar filas de supervisores (desde la fila 1 en adelante)
             for (let r = 1; r < rows.length; r++) {
                 let row = rows[r];
                 if (!row || row.length < 2) continue;
