@@ -32,7 +32,7 @@
         body {
             background-color: var(--bg-color);
             color: var(--text-main);
-            padding: 14px;
+            padding: 10px;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -48,34 +48,34 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 16px;
-            padding: 0 4px;
+            margin-bottom: 12px;
+            padding: 0 2px;
         }
 
         .brand {
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 10px;
         }
 
         .logo-badge {
             background-color: var(--accent-blue);
             color: #fff;
             font-weight: 800;
-            width: 44px;
-            height: 44px;
-            border-radius: 10px;
+            width: 40px;
+            height: 40px;
+            border-radius: 9px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 22px;
-            box-shadow: 0 3px 12px rgba(0, 163, 224, 0.4);
+            font-size: 20px;
+            box-shadow: 0 3px 10px rgba(0, 163, 224, 0.4);
             cursor: pointer;
             user-select: none;
         }
 
         .app-title h1 {
-            font-size: 15px;
+            font-size: 14px;
             font-weight: 800;
             letter-spacing: -0.2px;
             color: #fff;
@@ -83,19 +83,19 @@
         }
 
         .app-title p {
-            font-size: 12px;
+            font-size: 11px;
             color: var(--text-muted);
-            margin-top: 2px;
+            margin-top: 1px;
         }
 
         .personal-logo {
-            font-size: 18px;
+            font-size: 16px;
             font-weight: 900;
             color: var(--accent-blue);
             letter-spacing: -0.5px;
             background: rgba(0, 163, 224, 0.1);
-            padding: 6px 10px;
-            border-radius: 8px;
+            padding: 5px 8px;
+            border-radius: 7px;
             border: 1px solid rgba(0, 163, 224, 0.3);
         }
 
@@ -103,12 +103,12 @@
         .date-navigator {
             background: var(--card-bg);
             border: 1px solid var(--card-border);
-            border-radius: 11px;
-            padding: 12px 16px;
+            border-radius: 10px;
+            padding: 10px 14px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 16px;
+            margin-bottom: 12px;
             box-shadow: 0 4px 12px rgba(0,0,0,0.2);
         }
 
@@ -116,15 +116,15 @@
             background: rgba(255,255,255,0.08);
             border: 1px solid var(--card-border);
             color: var(--text-main);
-            width: 38px;
-            height: 38px;
-            border-radius: 8px;
+            width: 35px;
+            height: 35px;
+            border-radius: 7px;
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
             font-weight: bold;
-            font-size: 16px;
+            font-size: 15px;
             transition: background 0.2s;
         }
 
@@ -137,7 +137,7 @@
         }
 
         .current-date-display .main-label {
-            font-size: 14px;
+            font-size: 13px;
             font-weight: 800;
             color: var(--accent-blue);
             text-transform: uppercase;
@@ -145,29 +145,29 @@
         }
 
         .current-date-display .sub-label {
-            font-size: 11px;
+            font-size: 10px;
             color: var(--text-muted);
-            margin-top: 2px;
+            margin-top: 1px;
         }
 
-        /* Cuadro unificado de turnos */
+        /* Cuadro unificado de turnos optimizado para 7 días */
         .unified-card {
             background: var(--card-bg);
             border: 1px solid var(--card-border);
-            border-radius: 14px;
-            padding: 14px;
-            margin-bottom: 16px;
+            border-radius: 12px;
+            padding: 10px 6px;
+            margin-bottom: 12px;
             box-shadow: 0 6px 16px rgba(0,0,0,0.3);
             overflow-x: auto;
         }
 
         .days-header-grid {
             display: grid;
-            gap: 6px;
-            padding-bottom: 10px;
+            gap: 3px;
+            padding-bottom: 8px;
             border-bottom: 2px solid var(--card-border);
             text-align: center;
-            font-size: 12px;
+            font-size: 10px;
             font-weight: 800;
             color: var(--text-muted);
             text-transform: uppercase;
@@ -175,7 +175,7 @@
 
         .days-header-grid .col-sup {
             text-align: left;
-            padding-left: 6px;
+            padding-left: 4px;
         }
 
         .days-header-grid > div {
@@ -187,9 +187,9 @@
 
         .supervisor-row {
             display: grid;
-            gap: 6px;
+            gap: 3px;
             align-items: center;
-            padding: 12px 0;
+            padding: 10px 0;
             border-bottom: 1px solid rgba(255, 255, 255, 0.09);
         }
 
@@ -198,7 +198,7 @@
         }
 
         .sup-info .sup-name {
-            font-size: 14px;
+            font-size: 12px;
             font-weight: 800;
             color: var(--text-main);
             white-space: nowrap;
@@ -207,24 +207,24 @@
         }
 
         .sup-info .sup-area {
-            font-size: 11px;
+            font-size: 10px;
             color: var(--accent-blue);
             font-weight: 700;
-            margin-top: 2px;
+            margin-top: 1px;
         }
 
         .sup-contact-icons {
             display: flex;
-            gap: 10px;
-            margin-top: 6px;
+            gap: 6px;
+            margin-top: 4px;
         }
 
         .contact-btn {
             background: rgba(255, 255, 255, 0.07);
             border: 1px solid var(--card-border);
-            border-radius: 7px;
-            width: 34px;
-            height: 34px;
+            border-radius: 6px;
+            width: 30px;
+            height: 30px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -237,17 +237,22 @@
         }
 
         .contact-btn svg {
-            width: 20px;
-            height: 20px;
+            width: 17px;
+            height: 17px;
         }
 
         .shift-cell {
             text-align: center;
-            padding: 11px 4px;
-            border-radius: 8px;
-            font-size: 13px;
+            padding: 4px 1px;
+            border-radius: 6px;
+            font-size: 11px;
             font-weight: 800;
             border-right: 1px solid rgba(255, 255, 255, 0.05);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 40px;
         }
         .shift-cell:last-child {
             border-right: none;
@@ -256,15 +261,15 @@
         /* Estilos de turnos */
         .badge-am { background: var(--am-bg); color: var(--am-text); border: 1px solid rgba(56, 189, 248, 0.35); }
         .badge-pm { background: var(--pm-bg); color: var(--pm-text); border: 1px solid rgba(251, 191, 36, 0.35); }
-        .badge-guardia { background: var(--guardia-bg); color: var(--guardia-text); border: 1px solid rgba(248, 113, 113, 0.35); font-size: 11px; }
+        .badge-guardia { background: var(--guardia-bg); color: var(--guardia-text); border: 1px solid rgba(248, 113, 113, 0.35); font-size: 9px; line-height: 1.15; }
         .badge-franco { background: var(--franco-bg); color: var(--franco-text); border: 1px solid rgba(148, 163, 184, 0.2); }
         .badge-empty { color: var(--text-muted); opacity: 0.4; }
 
         footer {
             text-align: center;
-            font-size: 11px;
+            font-size: 10px;
             color: var(--text-muted);
-            margin-top: 14px;
+            margin-top: 10px;
         }
     </style>
 </head>
@@ -297,7 +302,7 @@
                 <!-- Dinámico -->
             </div>
             <div id="rowsSupervisorsContainer">
-                <div style="text-align:center; padding: 24px; color:var(--text-muted);">Cargando turnos en vivo...</div>
+                <div style="text-align:center; padding: 20px; color:var(--text-muted);">Cargando turnos en vivo...</div>
             </div>
         </div>
 
@@ -316,9 +321,9 @@
 
         let rawSchedule = {};
         let availableDates = [];
-        let currentIndex = 0; // Índice para modo técnico (día a día)
-        let baseWeekDate = new Date(); // Fecha base para modo supervisor (semana completa)
-        let isUnlocked = false; // Control de modo supervisor por contraseña
+        let currentIndex = 0; 
+        let baseWeekDate = new Date(); 
+        let isUnlocked = false; 
         let pClickCount = 0;
 
         async function loadSheetData() {
@@ -341,7 +346,7 @@
             } catch (error) {
                 console.error("Error al procesar datos:", error);
                 document.getElementById('rowsSupervisorsContainer').innerHTML = 
-                    `<div style="text-align:center; padding:18px; color:#f87171; font-size:12px;">Error al procesar datos del Google Sheet.</div>`;
+                    `<div style="text-align:center; padding:15px; color:#f87171; font-size:11px;">Error al procesar datos del Google Sheet.</div>`;
             }
         }
 
@@ -355,8 +360,8 @@
                 if (h) {
                     let normalized = parseAnyDate(h);
                     if (normalized) {
-                        let shortLabel = formatShortDateLabel(normalized);
-                        availableDates.push({ colIndex: c, dateStr: normalized, label: shortLabel });
+                        let parsedObj = parseDateDetails(normalized);
+                        availableDates.push({ colIndex: c, dateStr: normalized, dayNum: parsedObj.dayNum, monthName: parsedObj.monthName });
                     }
                 }
             }
@@ -385,11 +390,11 @@
             }
         }
 
-        function formatShortDateLabel(dateStr) {
+        function parseDateDetails(dateStr) {
             let p = dateStr.split('-');
             let month = p[1], day = p[2];
-            const months = { '01': 'ene', '02': 'feb', '03': 'mar', '04': 'abr', '05': 'may', '06': 'jun', '07': 'jul', '08': 'ago', '09': 'sep', '10': 'oct', '11': 'nov', '12': 'dic' };
-            return `${parseInt(day)}${months[month] || month}`;
+            const months = { '01': 'ENE', '02': 'FEB', '03': 'MAR', '04': 'ABR', '05': 'MAY', '06': 'JUN', '07': 'JUL', '08': 'AGO', '09': 'SEP', '10': 'OCT', '11': 'NOV', '12': 'DIC' };
+            return { dayNum: parseInt(day), monthName: months[month] || month };
         }
 
         function parseAnyDate(str) {
@@ -425,7 +430,6 @@
             return `${year}-${month}-${day}`;
         }
 
-        // 5 toques en la P para solicitar contraseña y activar modo supervisor
         function handleLogoClick() {
             pClickCount++;
             if (pClickCount >= 5) {
@@ -445,10 +449,8 @@
 
         function navigate(direction) {
             if (isUnlocked) {
-                // Modo supervisor: cambia de semana en semana
                 baseWeekDate.setDate(baseWeekDate.getDate() + (direction * 7));
             } else {
-                // Modo técnico: cambia de día en día con lógica inteligente de fin de semana / feriado
                 let currentItem = availableDates[currentIndex];
                 if (currentItem) {
                     let dParts = currentItem.dateStr.split('-');
@@ -468,10 +470,8 @@
             renderApp();
         }
 
-        // Obtener días a mostrar según el modo activo
         function getDaysToDisplay() {
             if (isUnlocked) {
-                // Modo supervisor: Muestra toda la semana (7 días)
                 let d = new Date(baseWeekDate);
                 let day = d.getDay();
                 let diffToMonday = d.getDate() - day + (day === 0 ? -6 : 1);
@@ -484,16 +484,14 @@
                 }
                 return weekArr;
             } else {
-                // Modo técnico inteligente: Detecta si es fin de semana o hay guardia (G) cercana
                 let currentItem = availableDates[currentIndex];
                 if (!currentItem) return [];
                 
                 let targetDateStr = currentItem.dateStr;
                 let p = targetDateStr.split('-');
                 let targetDate = new Date(p[0], p[1] - 1, p[2]);
-                let dayOfWeek = targetDate.getDay(); // 0: Dom, 6: Sáb
+                let dayOfWeek = targetDate.getDay(); 
 
-                // Buscar si hay una Guardia (G) programada cerca (para feriados o puentes)
                 let hasGuardNearby = false;
                 let scanStart = new Date(targetDate);
                 scanStart.setDate(scanStart.getDate() - 1);
@@ -508,11 +506,10 @@
                     }
                 }
 
-                // Si es Sábado/Domingo o hay guardia/feriado cercano, expande a 2 o 3 días
                 if (dayOfWeek === 0 || dayOfWeek === 6 || hasGuardNearby) {
                     let activeDays = [];
                     let blockStart = new Date(targetDate);
-                    blockStart.setDate(blockStart.getDate() - 1); // Tomar desde el día previo
+                    blockStart.setDate(blockStart.getDate() - 1);
                     
                     for(let i=0; i<3; i++) {
                         let currentD = new Date(blockStart);
@@ -525,7 +522,6 @@
                     if(activeDays.length >= 2) return activeDays;
                 }
 
-                // Por defecto para días de semana normales: Muestra exactamente 1 día
                 return [targetDateStr];
             }
         }
@@ -540,18 +536,23 @@
                 document.getElementById('lblSubSemana').innerText = `Auditoría activa`;
             } else {
                 let currentItem = availableDates[currentIndex];
-                document.getElementById('lblRangoFechas').innerText = currentItem ? currentItem.label.toUpperCase() : "FECHA";
+                document.getElementById('lblRangoFechas').innerText = currentItem ? `${currentItem.dayNum} ${currentItem.monthName}` : "FECHA";
                 document.getElementById('lblSubSemana').innerText = daysArr.length > 1 ? `Bloque fin de semana / Guardia` : `Modo técnico`;
             }
 
-            let colWidths = `135px ` + `repeat(${daysArr.length}, 1fr)`;
+            // Columna de nombres ajustada a 115px para que los 7 días entren holgados sin deslizar
+            let colWidths = `115px ` + `repeat(${daysArr.length}, 1fr)`;
             document.getElementById('headerGridDays').style.gridTemplateColumns = colWidths;
 
             let headerHtml = `<div class="col-sup">SUP</div>`;
             daysArr.forEach((dateStr) => {
                 let foundObj = availableDates.find(d => d.dateStr === dateStr);
-                let label = foundObj ? foundObj.label : dateStr;
-                headerHtml += `<div><span>${label}</span></div>`;
+                if (foundObj) {
+                    // Muestra el Mes arriba pequeño y el número de día abajo grande
+                    headerHtml += `<div><span style="font-size:8px; color:var(--text-muted); display:block;">${foundObj.monthName}</span><span style="font-size:11px; font-weight:800;">${foundObj.dayNum}</span></div>`;
+                } else {
+                    headerHtml += `<div><span>${dateStr}</span></div>`;
+                }
             });
             document.getElementById('headerGridDays').innerHTML = headerHtml;
 
@@ -588,7 +589,7 @@
                         displayText = "PM";
                     } else if (val === "G") {
                         badgeClass = "badge-guardia";
-                        displayText = "AM/PM";
+                        displayText = "AM<br>PM"; // AM arriba y PM abajo
                     } else if (val === "FC") {
                         badgeClass = "badge-franco";
                         displayText = "FC";
