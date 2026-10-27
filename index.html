@@ -99,7 +99,7 @@
             border: 1px solid rgba(0, 163, 224, 0.3);
         }
 
-        /* Botón de alternancia (Solo visible en Modo Supervisor desbloqueado) */
+        /* Botón de alternancia (Modo Supervisor) */
         .mode-toggle-bar {
             display: none;
             justify-content: center;
@@ -118,13 +118,9 @@
             font-weight: 700;
             cursor: pointer;
             box-shadow: 0 2px 8px rgba(0, 163, 224, 0.3);
-            transition: opacity 0.2s;
-        }
-        .toggle-btn:active {
-            opacity: 0.8;
         }
 
-        /* Selector de días / semanas */
+        /* Selector de días */
         .date-navigator {
             background: var(--card-bg);
             border: 1px solid var(--card-border);
@@ -175,7 +171,84 @@
             margin-top: 1px;
         }
 
-        /* Cuadro unificado de turnos optimizado para 7 días */
+        /* Tarjeta imponente estilo Placa Informativa para Guardia */
+        .guard-plaque-card {
+            background: linear-gradient(145deg, #0f1d32, #132845);
+            border: 2px solid var(--guardia-text);
+            border-radius: 14px;
+            padding: 16px;
+            margin-bottom: 12px;
+            box-shadow: 0 8px 24px rgba(239, 68, 68, 0.25);
+            text-align: center;
+        }
+
+        .plaque-header {
+            font-size: 11px;
+            font-weight: 800;
+            color: var(--guardia-text);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 6px;
+        }
+
+        .plaque-name {
+            font-size: 20px;
+            font-weight: 900;
+            color: #fff;
+            margin-bottom: 2px;
+        }
+
+        .plaque-sector {
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--accent-blue);
+            text-transform: uppercase;
+            margin-bottom: 12px;
+        }
+
+        .plaque-phone-box {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--card-border);
+            border-radius: 8px;
+            padding: 8px;
+            margin-bottom: 12px;
+            font-size: 15px;
+            font-weight: 800;
+            color: #fff;
+            letter-spacing: 0.5px;
+        }
+
+        .plaque-actions {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+        }
+
+        .plaque-btn {
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid var(--card-border);
+            border-radius: 8px;
+            padding: 8px 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #fff;
+            text-decoration: none;
+            font-size: 12px;
+            font-weight: 700;
+            transition: background 0.2s;
+        }
+
+        .plaque-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .plaque-btn svg {
+            width: 18px;
+            height: 18px;
+        }
+
+        /* Cuadro unificado normal (para Modo Supervisor o días de semana) */
         .unified-card {
             background: var(--card-bg);
             border: 1px solid var(--card-border);
@@ -311,12 +384,12 @@
             <div class="personal-logo">personal</div>
         </header>
 
-        <!-- BOTÓN DE ALTERNANCIA (MODO TÉCNICO / MODO SUPERVISOR) -->
+        <!-- BOTÓN DE ALTERNANCIA (MODO SUPERVISOR) -->
         <div id="modeToggleBar" class="mode-toggle-bar">
             <button class="toggle-btn" id="toggleModeBtn" onclick="toggleViewMode()">Cambiar a Modo Supervisor</button>
         </div>
 
-        <!-- SELECTOR DE DÍAS / SEMANAS -->
+        <!-- SELECTOR DE DÍAS -->
         <div id="dateNavigator" class="date-navigator">
             <button class="nav-arrow" onclick="navigate(-1)">&#10094;</button>
             <div class="current-date-display">
@@ -326,15 +399,8 @@
             <button class="nav-arrow" onclick="navigate(1)">&#10095;</button>
         </div>
 
-        <!-- CUADRO UNIFICADO -->
-        <div class="unified-card">
-            <div class="days-header-grid" id="headerGridDays">
-                <!-- Dinámico -->
-            </div>
-            <div id="rowsSupervisorsContainer">
-                <div style="text-align:center; padding: 20px; color:var(--text-muted);">Cargando turnos en vivo...</div>
-            </div>
-        </div>
+        <!-- CONTENEDOR DINÁMICO: PLACA IMPONENTE O GRILLA NORMAL -->
+        <div id="appContainer"></div>
 
         <footer>Sierras Chicas • Panel Operativo</footer>
     </div>
@@ -353,8 +419,8 @@
         let availableDates = [];
         let currentIndex = 0; 
         let baseWeekDate = new Date(); 
-        let isAuthorized = false; // Contraseña ingresada
-        let isSupervisorMode = false; // Estado actual (false = modo técnico, true = modo supervisor)
+        let isAuthorized = false; 
+        let isSupervisorMode = false; 
         let pClickCount = 0;
 
         async function loadSheetData() {
@@ -376,7 +442,7 @@
                 renderApp();
             } catch (error) {
                 console.error("Error al procesar datos:", error);
-                document.getElementById('rowsSupervisorsContainer').innerHTML = 
+                document.getElementById('appContainer').innerHTML = 
                     `<div style="text-align:center; padding:15px; color:#f87171; font-size:11px;">Error al procesar datos del Google Sheet.</div>`;
             }
         }
@@ -461,7 +527,6 @@
             return `${year}-${month}-${day}`;
         }
 
-        // 5 toques en la P para solicitar contraseña
         function handleLogoClick() {
             pClickCount++;
             if (pClickCount >= 5) {
@@ -469,7 +534,7 @@
                 let pin = prompt("INGRESE CONTRASEÑA DE MODO SUPERVISOR:");
                 if (pin === "1234") {
                     isAuthorized = true;
-                    isSupervisorMode = true; // Activa modo supervisor por defecto al ingresar
+                    isSupervisorMode = true;
                     alert("¡BIENVENIDO!");
                     document.getElementById('modeToggleBar').classList.add('active');
                     renderApp();
@@ -481,7 +546,6 @@
             }
         }
 
-        // Botón para alternar entre Modo Técnico y Modo Supervisor
         function toggleViewMode() {
             isSupervisorMode = !isSupervisorMode;
             let btn = document.getElementById('toggleModeBtn');
@@ -516,10 +580,8 @@
             renderApp();
         }
 
-        // Lógica de días a mostrar según los requerimientos
         function getDaysToDisplay() {
             if (isSupervisorMode) {
-                // Modo supervisor: Muestra toda la semana de lunes a domingo
                 let d = new Date(baseWeekDate);
                 let day = d.getDay();
                 let diffToMonday = d.getDate() - day + (day === 0 ? -6 : 1);
@@ -532,25 +594,20 @@
                 }
                 return weekArr;
             } else {
-                // Modo técnico: Lunes a viernes muestra 1 día. Sábado muestra sábado, domingo y opcionalmente un día extra si hay "G"
                 let currentItem = availableDates[currentIndex];
                 if (!currentItem) return [];
                 
                 let targetDateStr = currentItem.dateStr;
                 let p = targetDateStr.split('-');
                 let targetDate = new Date(p[0], p[1] - 1, p[2]);
-                let dayOfWeek = targetDate.getDay(); // 0: Dom, 6: Sáb, 1-5: Lunes a Viernes
+                let dayOfWeek = targetDate.getDay(); 
 
-                // Si es Lunes a Viernes (1 al 5): Muestra estrictamente 1 solo día
                 if (dayOfWeek >= 1 && dayOfWeek <= 5) {
                     return [targetDateStr];
                 }
 
-                // Si es Sábado (6) o Domingo (0): Muestra fin de semana (sábado y domingo)
-                // Y verificamos si hay una "G" (Guardia) pegada (viernes anterior o lunes siguiente)
                 let activeDays = [];
-                
-                if (dayOfWeek === 6) { // Es Sábado
+                if (dayOfWeek === 6) {
                     let satKey = targetDateStr;
                     let sunDate = new Date(targetDate); sunDate.setDate(targetDate.getDate() + 1);
                     let sunKey = formatDateKey(sunDate);
@@ -558,20 +615,18 @@
                     activeDays = [satKey];
                     if(availableDates.some(d => d.dateStr === sunKey)) activeDays.push(sunKey);
 
-                    // Verificar si el viernes anterior tiene "G"
                     let friDate = new Date(targetDate); friDate.setDate(targetDate.getDate() - 1);
                     let friKey = formatDateKey(friDate);
                     if(rawSchedule[friKey] && Object.values(rawSchedule[friKey]).includes("G")) {
-                        if(availableDates.some(d => d.dateStr === friKey)) activeDays.unshift(friKey); // Agregar al inicio (viernes)
+                        if(availableDates.some(d => d.dateStr === friKey)) activeDays.unshift(friKey);
                     }
-                    // Verificar si el lunes siguiente tiene "G"
                     let monDate = new Date(targetDate); monDate.setDate(targetDate.getDate() + 2);
                     let monKey = formatDateKey(monDate);
                     if(rawSchedule[monKey] && Object.values(rawSchedule[monKey]).includes("G")) {
-                        if(availableDates.some(d => d.dateStr === monKey)) activeDays.push(monKey); // Agregar al final (lunes)
+                        if(availableDates.some(d => d.dateStr === monKey)) activeDays.push(monKey);
                     }
                     return activeDays;
-                } else if (dayOfWeek === 0) { // Si justo abre en Domingo
+                } else if (dayOfWeek === 0) {
                     let satDate = new Date(targetDate); satDate.setDate(targetDate.getDate() - 1);
                     let satKey = formatDateKey(satDate);
                     let sunKey = targetDateStr;
@@ -596,79 +651,160 @@
             if (availableDates.length === 0) return;
 
             let daysArr = getDaysToDisplay();
+            const container = document.getElementById('appContainer');
 
             if (isSupervisorMode) {
                 document.getElementById('lblRangoFechas').innerText = `MODO SUPERVISOR (SEMANA)`;
                 document.getElementById('lblSubSemana').innerText = `Auditoría activa`;
+                
+                // MODO SUPERVISOR: Muestra la grilla completa con los 4 supervisores
+                let colWidths = `115px ` + `repeat(${daysArr.length}, 1fr)`;
+                let html = `<div class="unified-card">
+                    <div class="days-header-grid" id="headerGridDays" style="grid-template-columns: ${colWidths};">
+                        <div class="col-sup">SUP</div>`;
+                
+                daysArr.forEach((dateStr) => {
+                    let foundObj = availableDates.find(d => d.dateStr === dateStr);
+                    if (foundObj) {
+                        html += `<div><span style="font-size:8px; color:var(--text-muted); display:block;">${foundObj.monthName}</span><span style="font-size:11px; font-weight:800;">${foundObj.dayNum}</span></div>`;
+                    } else {
+                        html += `<div><span>${dateStr}</span></div>`;
+                    }
+                });
+                html += `</div><div id="rowsSupervisorsContainer">`;
+
+                supervisorsList.forEach(sup => {
+                    html += `
+                        <div class="supervisor-row" style="grid-template-columns: ${colWidths};">
+                            <div class="sup-info">
+                                <div class="sup-name">${sup.name}</div>
+                                <div class="sup-area">${sup.area}</div>
+                                <div class="sup-contact-icons">
+                                    <a href="https://wa.me/${sup.phone}" target="_blank" class="contact-btn" title="Enviar WhatsApp">
+                                        <svg viewBox="0 0 24 24" fill="#25D366"><path d="M17.472 14.382c-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.096 3.2 5.077 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.84 9.84 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.41 0 0 5.41 0 12.053c0 2.11.553 4.162 1.604 5.971L0 24l6.143-1.605a11.83 11.83 0 005.905 1.585h.005c6.64 0 12.05-5.41 12.05-12.05a11.9 11.9 0 00-3.488-8.413z"/></svg>
+                                    </a>
+                                    <a href="mailto:${sup.email}" class="contact-btn" title="Enviar Correo Outlook">
+                                        <svg viewBox="0 0 24 24"><path fill="#0078D4" d="M12.5 2.5l9 5.2v10.6l-9 5.2-9-5.2V7.7l9-5.2z"/><path fill="#198AB3" d="M12.5 2.5v21l9-5.2V7.7l-9-5.2z"/><path fill="#005A9E" d="M12.5 13.5L3.5 8.3l9-5.2 9 5.2-9 5.2z"/><path fill="#002050" d="M3.5 8.3v9.5l9 5.2v-11.1l-9-3.6z"/><circle cx="8" cy="15" r="4.5" fill="#0078D4"/><text x="8" y="17.2" font-size="6.5" font-weight="bold" fill="#ffffff" text-anchor="middle">O</text></svg>
+                                    </a>
+                                </div>
+                            </div>`;
+
+                    daysArr.forEach(dateStr => {
+                        let dayData = rawSchedule[dateStr] || {};
+                        let val = dayData[sup.key] || "";
+                        let badgeClass = "badge-empty";
+                        let displayText = "-";
+
+                        if (val === "AM") { badgeClass = "badge-am"; displayText = "AM"; }
+                        else if (val === "PM") { badgeClass = "badge-pm"; displayText = "PM"; }
+                        else if (val === "G") { badgeClass = "badge-guardia"; displayText = "AM<br>PM"; }
+                        else if (val === "FC") { badgeClass = "badge-franco"; displayText = "FC"; }
+                        else if (val === "VAC") { badgeClass = "badge-franco"; displayText = "VAC"; }
+
+                        html += `<div class="shift-cell ${badgeClass}">${displayText}</div>`;
+                    });
+
+                    html += `</div>`;
+                });
+
+                html += `</div></div>`;
+                container.innerHTML = html;
+
             } else {
+                // MODO TÉCNICO: Si es un bloque múltiple (fin de semana o guardia extendida), detectamos quiénes trabajan
                 let currentItem = availableDates[currentIndex];
                 document.getElementById('lblRangoFechas').innerText = currentItem ? `${currentItem.dayNum} ${currentItem.monthName}` : "FECHA";
                 document.getElementById('lblSubSemana').innerText = daysArr.length > 1 ? `Bloque fin de semana / Guardia` : `Modo técnico (Día actual)`;
-            }
 
-            let colWidths = `115px ` + `repeat(${daysArr.length}, 1fr)`;
-            document.getElementById('headerGridDays').style.gridTemplateColumns = colWidths;
+                if (daysArr.length > 1) {
+                    // Filtrar supervisores que tengan al menos un turno activo (AM, PM o G) en este bloque
+                    let activeSupervisors = supervisorsList.filter(sup => {
+                        return daysArr.some(dateStr => {
+                            let dayData = rawSchedule[dateStr] || {};
+                            let val = dayData[sup.key] || "";
+                            return val === "AM" || val === "PM" || val === "G";
+                        });
+                    });
 
-            let headerHtml = `<div class="col-sup">SUP</div>`;
-            daysArr.forEach((dateStr) => {
-                let foundObj = availableDates.find(d => d.dateStr === dateStr);
-                if (foundObj) {
-                    headerHtml += `<div><span style="font-size:8px; color:var(--text-muted); display:block;">${foundObj.monthName}</span><span style="font-size:11px; font-weight:800;">${foundObj.dayNum}</span></div>`;
+                    if (activeSupervisors.length === 0) activeSupervisors = supervisorsList; // Fallback
+
+                    let plaquesHtml = '';
+                    activeSupervisors.forEach(sup => {
+                        plaquesHtml += `
+                            <div class="guard-plaque-card">
+                                <div class="plaque-header">Supervisor de Guardia / Operación</div>
+                                <div class="plaque-name">${sup.name}</div>
+                                <div class="plaque-sector">Sector: ${sup.area}</div>
+                                <div class="plaque-phone-box">📱 Cel: +${sup.phone}</div>
+                                <div class="plaque-actions">
+                                    <a href="https://wa.me/${sup.phone}" target="_blank" class="plaque-btn">
+                                        <svg viewBox="0 0 24 24" fill="#25D366"><path d="M17.472 14.382c-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.096 3.2 5.077 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.84 9.84 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.41 0 0 5.41 0 12.053c0 2.11.553 4.162 1.604 5.971L0 24l6.143-1.605a11.83 11.83 0 005.905 1.585h.005c6.64 0 12.05-5.41 12.05-12.05a11.9 11.9 0 00-3.488-8.413z"/></svg>
+                                        WhatsApp
+                                    </a>
+                                    <a href="mailto:${sup.email}" class="plaque-btn">
+                                        <svg viewBox="0 0 24 24"><path fill="#0078D4" d="M12.5 2.5l9 5.2v10.6l-9 5.2-9-5.2V7.7l9-5.2z"/><path fill="#198AB3" d="M12.5 2.5v21l9-5.2V7.7l-9-5.2z"/><path fill="#005A9E" d="M12.5 13.5L3.5 8.3l9-5.2 9 5.2-9 5.2z"/><path fill="#002050" d="M3.5 8.3v9.5l9 5.2v-11.1l-9-3.6z"/><circle cx="8" cy="15" r="4.5" fill="#0078D4"/><text x="8" y="17.2" font-size="6.5" font-weight="bold" fill="#ffffff" text-anchor="middle">O</text></svg>
+                                        Correo
+                                    </a>
+                                </div>
+                            </div>`;
+                    });
+                    container.innerHTML = plaquesHtml;
+
                 } else {
-                    headerHtml += `<div><span>${dateStr}</span></div>`;
+                    // Modo técnico normal de 1 día (Lunes a Viernes): Muestra la grilla de ese día
+                    let colWidths = `115px repeat(1, 1fr)`;
+                    let html = `<div class="unified-card">
+                        <div class="days-header-grid" id="headerGridDays" style="grid-template-columns: ${colWidths};">
+                            <div class="col-sup">SUP</div>`;
+                    
+                    daysArr.forEach((dateStr) => {
+                        let foundObj = availableDates.find(d => d.dateStr === dateStr);
+                        if (foundObj) {
+                            html += `<div><span style="font-size:8px; color:var(--text-muted); display:block;">${foundObj.monthName}</span><span style="font-size:11px; font-weight:800;">${foundObj.dayNum}</span></div>`;
+                        } else {
+                            html += `<div><span>${dateStr}</span></div>`;
+                        }
+                    });
+                    html += `</div><div id="rowsSupervisorsContainer">`;
+
+                    supervisorsList.forEach(sup => {
+                        html += `
+                            <div class="supervisor-row" style="grid-template-columns: ${colWidths};">
+                                <div class="sup-info">
+                                    <div class="sup-name">${sup.name}</div>
+                                    <div class="sup-area">${sup.area}</div>
+                                    <div class="sup-contact-icons">
+                                        <a href="https://wa.me/${sup.phone}" target="_blank" class="contact-btn" title="Enviar WhatsApp">
+                                            <svg viewBox="0 0 24 24" fill="#25D366"><path d="M17.472 14.382c-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.096 3.2 5.077 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.84 9.84 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.41 0 0 5.41 0 12.053c0 2.11.553 4.162 1.604 5.971L0 24l6.143-1.605a11.83 11.83 0 005.905 1.585h.005c6.64 0 12.05-5.41 12.05-12.05a11.9 11.9 0 00-3.488-8.413z"/></svg>
+                                        </a>
+                                        <a href="mailto:${sup.email}" class="contact-btn" title="Enviar Correo Outlook">
+                                            <svg viewBox="0 0 24 24"><path fill="#0078D4" d="M12.5 2.5l9 5.2v10.6l-9 5.2-9-5.2V7.7l9-5.2z"/><path fill="#198AB3" d="M12.5 2.5v21l9-5.2V7.7l-9-5.2z"/><path fill="#005A9E" d="M12.5 13.5L3.5 8.3l9-5.2 9 5.2-9 5.2z"/><path fill="#002050" d="M3.5 8.3v9.5l9 5.2v-11.1l-9-3.6z"/><circle cx="8" cy="15" r="4.5" fill="#0078D4"/><text x="8" y="17.2" font-size="6.5" font-weight="bold" fill="#ffffff" text-anchor="middle">O</text></svg>
+                                        </a>
+                                    </div>
+                                </div>`;
+
+                        daysArr.forEach(dateStr => {
+                            let dayData = rawSchedule[dateStr] || {};
+                            let val = dayData[sup.key] || "";
+                            let badgeClass = "badge-empty";
+                            let displayText = "-";
+
+                            if (val === "AM") { badgeClass = "badge-am"; displayText = "AM"; }
+                            else if (val === "PM") { badgeClass = "badge-pm"; displayText = "PM"; }
+                            else if (val === "G") { badgeClass = "badge-guardia"; displayText = "AM<br>PM"; }
+                            else if (val === "FC") { badgeClass = "badge-franco"; displayText = "FC"; }
+                            else if (val === "VAC") { badgeClass = "badge-franco"; displayText = "VAC"; }
+
+                            html += `<div class="shift-cell ${badgeClass}">${displayText}</div>`;
+                        });
+
+                        html += `</div>`;
+                    });
+
+                    html += `</div></div>`;
+                    container.innerHTML = html;
                 }
-            });
-            document.getElementById('headerGridDays').innerHTML = headerHtml;
-
-            let rowsHtml = '';
-            supervisorsList.forEach(sup => {
-                rowsHtml += `
-                    <div class="supervisor-row" style="grid-template-columns: ${colWidths};">
-                        <div class="sup-info">
-                            <div class="sup-name">${sup.name}</div>
-                            <div class="sup-area">${sup.area}</div>
-                            <div class="sup-contact-icons">
-                                <a href="https://wa.me/${sup.phone}" target="_blank" class="contact-btn" title="Enviar WhatsApp">
-                                    <svg viewBox="0 0 24 24" fill="#25D366"><path d="M17.472 14.382c-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.096 3.2 5.077 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.84 9.84 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.41 0 0 5.41 0 12.053c0 2.11.553 4.162 1.604 5.971L0 24l6.143-1.605a11.83 11.83 0 005.905 1.585h.005c6.64 0 12.05-5.41 12.05-12.05a11.9 11.9 0 00-3.488-8.413z"/></svg>
-                                </a>
-                                <a href="mailto:${sup.email}" class="contact-btn" title="Enviar Correo Outlook">
-                                    <svg viewBox="0 0 24 24"><path fill="#0078D4" d="M12.5 2.5l9 5.2v10.6l-9 5.2-9-5.2V7.7l9-5.2z"/><path fill="#198AB3" d="M12.5 2.5v21l9-5.2V7.7l-9-5.2z"/><path fill="#005A9E" d="M12.5 13.5L3.5 8.3l9-5.2 9 5.2-9 5.2z"/><path fill="#002050" d="M3.5 8.3v9.5l9 5.2v-11.1l-9-3.6z"/><circle cx="8" cy="15" r="4.5" fill="#0078D4"/><text x="8" y="17.2" font-size="6.5" font-weight="bold" fill="#ffffff" text-anchor="middle">O</text></svg>
-                                </a>
-                            </div>
-                        </div>
-                `;
-
-                daysArr.forEach(dateStr => {
-                    let dayData = rawSchedule[dateStr] || {};
-                    let val = dayData[sup.key] || "";
-
-                    let badgeClass = "badge-empty";
-                    let displayText = "-";
-
-                    if (val === "AM") {
-                        badgeClass = "badge-am";
-                        displayText = "AM";
-                    } else if (val === "PM") {
-                        badgeClass = "badge-pm";
-                        displayText = "PM";
-                    } else if (val === "G") {
-                        badgeClass = "badge-guardia";
-                        displayText = "AM<br>PM";
-                    } else if (val === "FC") {
-                        badgeClass = "badge-franco";
-                        displayText = "FC";
-                    } else if (val === "VAC") {
-                        badgeClass = "badge-franco";
-                        displayText = "VAC";
-                    }
-
-                    rowsHtml += `<div class="shift-cell ${badgeClass}">${displayText}</div>`;
-                });
-
-                rowsHtml += `</div>`;
-            });
-
-            document.getElementById('rowsSupervisorsContainer').innerHTML = rowsHtml;
+            }
         }
 
         loadSheetData();
