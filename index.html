@@ -99,7 +99,7 @@
             border: 1px solid rgba(0, 163, 224, 0.3);
         }
 
-        /* Selector de días visible por defecto en modo prueba */
+        /* Selector de días / semanas */
         .date-navigator {
             background: var(--card-bg);
             border: 1px solid var(--card-border);
@@ -190,7 +190,7 @@
             gap: 6px;
             align-items: center;
             padding: 12px 0;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.09); /* Línea horizontal más notoria */
+            border-bottom: 1px solid rgba(255, 255, 255, 0.09);
         }
 
         .supervisor-row:last-child {
@@ -198,7 +198,7 @@
         }
 
         .sup-info .sup-name {
-            font-size: 14px; /* Nombres más grandes */
+            font-size: 14px;
             font-weight: 800;
             color: var(--text-main);
             white-space: nowrap;
@@ -243,11 +243,11 @@
 
         .shift-cell {
             text-align: center;
-            padding: 11px 4px; /* Botones de turno más grandes y cómodos */
+            padding: 11px 4px;
             border-radius: 8px;
             font-size: 13px;
             font-weight: 800;
-            border-right: 1px solid rgba(255, 255, 255, 0.05); /* Línea vertical en columnas de días */
+            border-right: 1px solid rgba(255, 255, 255, 0.05);
         }
         .shift-cell:last-child {
             border-right: none;
@@ -281,14 +281,14 @@
             <div class="personal-logo">personal</div>
         </header>
 
-        <!-- SELECTOR DE DÍAS (LIBRE EN MODO PRUEBA) -->
+        <!-- SELECTOR DE DÍAS / SEMANAS -->
         <div id="dateNavigator" class="date-navigator">
-            <button class="nav-arrow" onclick="changeDay(-1)">&#10094;</button>
+            <button class="nav-arrow" onclick="navigate(-1)">&#10094;</button>
             <div class="current-date-display">
                 <div class="main-label" id="lblRangoFechas">Fecha</div>
-                <div class="sub-label" id="lblSubSemana">Navegación libre</div>
+                <div class="sub-label" id="lblSubSemana">Modo técnico</div>
             </div>
-            <button class="nav-arrow" onclick="changeDay(1)">&#10095;</button>
+            <button class="nav-arrow" onclick="navigate(1)">&#10095;</button>
         </div>
 
         <!-- CUADRO UNIFICADO -->
@@ -316,7 +316,9 @@
 
         let rawSchedule = {};
         let availableDates = [];
-        let currentDateIndex = 0; // Apuntará al día actual dentro del array disponible
+        let currentIndex = 0; // Índice para modo técnico (día a día)
+        let baseWeekDate = new Date(); // Fecha base para modo supervisor (semana completa)
+        let isUnlocked = false; // Control de modo supervisor por contraseña
         let pClickCount = 0;
 
         async function loadSheetData() {
@@ -329,10 +331,11 @@
                     let todayKey = formatDateKey(new Date());
                     let foundIndex = availableDates.findIndex(d => d.dateStr === todayKey);
                     if (foundIndex !== -1) {
-                        currentDateIndex = foundIndex;
+                        currentIndex = foundIndex;
                     } else {
-                        currentDateIndex = 0;
+                        currentIndex = 0;
                     }
+                    baseWeekDate = new Date();
                 }
                 renderApp();
             } catch (error) {
@@ -386,7 +389,7 @@
             let p = dateStr.split('-');
             let month = p[1], day = p[2];
             const months = { '01': 'ene', '02': 'feb', '03': 'mar', '04': 'abr', '05': 'may', '06': 'jun', '07': 'jul', '08': 'ago', '09': 'sep', '10': 'oct', '11': 'nov', '12': 'dic' };
-            return `${parseInt(day)}${months[month] || month}`; // Formato limpio sin guión (ej: 27oct)
+            return `${parseInt(day)}${months[month] || month}`;
         }
 
         function parseAnyDate(str) {
@@ -422,39 +425,124 @@
             return `${year}-${month}-${day}`;
         }
 
-        // Lógica de 5 toques en la letra "P" para pedir contraseña
+        // 5 toques en la P para solicitar contraseña y activar modo supervisor
         function handleLogoClick() {
             pClickCount++;
             if (pClickCount >= 5) {
                 pClickCount = 0;
                 let pin = prompt("INGRESE CONTRASEÑA DE MODO SUPERVISOR:");
                 if (pin === "1234") {
+                    isUnlocked = true;
                     alert("¡BIENVENIDO!");
+                    renderApp();
                 } else if (pin !== null) {
                     alert("Contraseña incorrecta.");
                 }
             } else {
-                // Reseteador de toques si pasa mucho tiempo sin tocar
                 setTimeout(() => { pClickCount = 0; }, 3000);
             }
         }
 
-        function changeDay(direction) {
-            currentDateIndex += direction;
-            if (currentDateIndex < 0) currentDateIndex = 0;
-            if (currentDateIndex >= availableDates.length) currentDateIndex = availableDates.length - 1;
+        function navigate(direction) {
+            if (isUnlocked) {
+                // Modo supervisor: cambia de semana en semana
+                baseWeekDate.setDate(baseWeekDate.getDate() + (direction * 7));
+            } else {
+                // Modo técnico: cambia de día en día con lógica inteligente de fin de semana / feriado
+                let currentItem = availableDates[currentIndex];
+                if (currentItem) {
+                    let dParts = currentItem.dateStr.split('-');
+                    let d = new Date(dParts[0], dParts[1] - 1, dParts[2]);
+                    d.setDate(d.getDate() + direction);
+                    let targetKey = formatDateKey(d);
+                    let foundIdx = availableDates.findIndex(item => item.dateStr === targetKey);
+                    if (foundIdx !== -1) {
+                        currentIndex = foundIdx;
+                    } else {
+                        currentIndex += direction;
+                        if (currentIndex < 0) currentIndex = 0;
+                        if (currentIndex >= availableDates.length) currentIndex = availableDates.length - 1;
+                    }
+                }
+            }
             renderApp();
+        }
+
+        // Obtener días a mostrar según el modo activo
+        function getDaysToDisplay() {
+            if (isUnlocked) {
+                // Modo supervisor: Muestra toda la semana (7 días)
+                let d = new Date(baseWeekDate);
+                let day = d.getDay();
+                let diffToMonday = d.getDate() - day + (day === 0 ? -6 : 1);
+                let monday = new Date(d.setDate(diffToMonday));
+                let weekArr = [];
+                for (let i = 0; i < 7; i++) {
+                    let nextDay = new Date(monday);
+                    nextDay.setDate(monday.getDate() + i);
+                    weekArr.push(formatDateKey(nextDay));
+                }
+                return weekArr;
+            } else {
+                // Modo técnico inteligente: Detecta si es fin de semana o hay guardia (G) cercana
+                let currentItem = availableDates[currentIndex];
+                if (!currentItem) return [];
+                
+                let targetDateStr = currentItem.dateStr;
+                let p = targetDateStr.split('-');
+                let targetDate = new Date(p[0], p[1] - 1, p[2]);
+                let dayOfWeek = targetDate.getDay(); // 0: Dom, 6: Sáb
+
+                // Buscar si hay una Guardia (G) programada cerca (para feriados o puentes)
+                let hasGuardNearby = false;
+                let scanStart = new Date(targetDate);
+                scanStart.setDate(scanStart.getDate() - 1);
+                for(let i=0; i<3; i++) {
+                    let checkD = new Date(scanStart);
+                    checkD.setDate(scanStart.getDate() + i);
+                    let cKey = formatDateKey(checkD);
+                    if(rawSchedule[cKey]) {
+                        Object.values(rawSchedule[cKey]).forEach(val => {
+                            if(val === "G") hasGuardNearby = true;
+                        });
+                    }
+                }
+
+                // Si es Sábado/Domingo o hay guardia/feriado cercano, expande a 2 o 3 días
+                if (dayOfWeek === 0 || dayOfWeek === 6 || hasGuardNearby) {
+                    let activeDays = [];
+                    let blockStart = new Date(targetDate);
+                    blockStart.setDate(blockStart.getDate() - 1); // Tomar desde el día previo
+                    
+                    for(let i=0; i<3; i++) {
+                        let currentD = new Date(blockStart);
+                        currentD.setDate(blockStart.getDate() + i);
+                        let cKey = formatDateKey(currentD);
+                        if(availableDates.some(d => d.dateStr === cKey)) {
+                            activeDays.push(cKey);
+                        }
+                    }
+                    if(activeDays.length >= 2) return activeDays;
+                }
+
+                // Por defecto para días de semana normales: Muestra exactamente 1 día
+                return [targetDateStr];
+            }
         }
 
         function renderApp() {
             if (availableDates.length === 0) return;
 
-            // Muestra de a 1 día con las flechas del selector libre
-            let currentItem = availableDates[currentDateIndex];
-            let daysArr = [currentItem.dateStr];
+            let daysArr = getDaysToDisplay();
 
-            document.getElementById('lblRangoFechas').innerText = currentItem.label.toUpperCase();
-            document.getElementById('lblSubSemana').innerText = `Modo prueba activo`;
+            if (isUnlocked) {
+                document.getElementById('lblRangoFechas').innerText = `MODO SUPERVISOR (SEMANA)`;
+                document.getElementById('lblSubSemana').innerText = `Auditoría activa`;
+            } else {
+                let currentItem = availableDates[currentIndex];
+                document.getElementById('lblRangoFechas').innerText = currentItem ? currentItem.label.toUpperCase() : "FECHA";
+                document.getElementById('lblSubSemana').innerText = daysArr.length > 1 ? `Bloque fin de semana / Guardia` : `Modo técnico`;
+            }
 
             let colWidths = `135px ` + `repeat(${daysArr.length}, 1fr)`;
             document.getElementById('headerGridDays').style.gridTemplateColumns = colWidths;
