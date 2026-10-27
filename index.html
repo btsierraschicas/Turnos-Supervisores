@@ -354,7 +354,7 @@
                 <!-- Dinámico -->
             </div>
             <div id="rowsSupervisorsContainer">
-                <div style="text-align:center; padding: 20px; color:var(--text-muted);">Conectando con Google Sheets...</div>
+                <div style="text-align:center; padding: 20px; color:var(--text-muted);">Cargando turnos en vivo...</div>
             </div>
         </div>
 
@@ -398,8 +398,6 @@
                 const rows = await response.json();
                 parseSheetRows(rows);
                 
-                localStorage.setItem('cached_rows', JSON.stringify(rows));
-
                 if (availableDates.length > 0) {
                     let todayKey = formatDateKey(new Date());
                     let found = availableDates.find(d => d.dateStr === todayKey);
@@ -409,15 +407,9 @@
                 }
                 renderApp();
             } catch (error) {
-                console.warn("Usando caché de respaldo...", error);
-                let cached = localStorage.getItem('cached_rows');
-                if (cached) {
-                    parseSheetRows(JSON.parse(cached));
-                    renderApp();
-                } else {
-                    document.getElementById('rowsSupervisorsContainer').innerHTML = 
-                        `<div style="text-align:center; padding:15px; color:#f87171; font-size:11px;">Error de conexión. Verifique la implementación del Apps Script.</div>`;
-                }
+                console.error("Error al procesar datos:", error);
+                document.getElementById('rowsSupervisorsContainer').innerHTML = 
+                    `<div style="text-align:center; padding:15px; color:#f87171; font-size:11px;">Error al procesar datos del Google Sheet.</div>`;
             }
         }
 
@@ -426,12 +418,13 @@
             const headers = rows[0];
             availableDates = [];
 
+            // Mapear cabeceras tolerando diferentes formatos de fecha de Google Sheets
             for (let c = 2; c < headers.length; c++) {
                 let h = String(headers[c]).trim();
                 if (h) {
-                    let normalized = parseSpanishDate(h);
+                    let normalized = parseAnyDate(h);
                     if (normalized) {
-                        availableDates.push({ colIndex: c, dateStr: normalized, label: h });
+                        availableDates.push({ colIndex: c, dateStr: normalized, label: h.split('T')[0] });
                     }
                 }
             }
@@ -449,7 +442,7 @@
 
                 if (supKey) {
                     availableDates.forEach(item => {
-                        let val = row[item.colIndex] ? String(row[item.colIndex]).trim() : "";
+                        let val = row[item.colIndex] !== undefined ? String(row[item.colIndex]).trim() : "";
                         if (!rawSchedule[item.dateStr]) {
                             rawSchedule[item.dateStr] = {};
                         }
@@ -459,19 +452,32 @@
             }
         }
 
-        function parseSpanishDate(str) {
-            str = str.toLowerCase().trim();
+        function parseAnyDate(str) {
+            str = str.trim();
+            // Si viene como fecha serial de Excel/Google o formato ISO
+            if (str.includes('T') || str.includes('Z')) {
+                return str.split('T')[0];
+            }
+            // Intentar detectar formato YYYY-MM-DD
+            if (/^\d{4}[-/]\d{1,2}[-/]\d{1,2}/.test(str)) {
+                let parts = str.split(/[-/]/);
+                return `${parts[0]}-${parts[1].padStart(2,'0')}-${parts[2].padStart(2,'0')}`;
+            }
+            // Intentar formato en español (ej: 27-oct, 15-ago, etc.)
+            let lower = str.toLowerCase();
             const months = { 'ene': '01', 'feb': '02', 'mar': '03', 'abr': '04', 'may': '05', 'jun': '06', 'jul': '07', 'ago': '08', 'sep': '09', 'oct': '10', 'nov': '11', 'dic': '12' };
-            
-            let parts = str.split(/[-/]/);
+            let parts = lower.split(/[-/]/);
             if (parts.length >= 2) {
                 let day = parts[0].padStart(2, '0');
-                let monthKey = parts[1].substring(0, 3);
-                let month = months[monthKey];
+                let mKey = parts[1].substring(0, 3);
+                let month = months[mKey];
                 let year = parts[2] ? (parts[2].length === 2 ? '20' + parts[2] : parts[2]) : '2026';
-                if (month) {
-                    return `${year}-${month}-${day}`;
-                }
+                if (month) return `${year}-${month}-${day}`;
+            }
+            // Fallback genérico de fecha JS
+            let d = new Date(str);
+            if (!isNaN(d.getTime())) {
+                return formatDateKey(d);
             }
             return null;
         }
@@ -564,7 +570,7 @@
             let headerHtml = `<div class="col-sup">Sup</div>`;
             daysArr.forEach((dateStr) => {
                 let foundObj = availableDates.find(d => d.dateStr === dateStr);
-                let label = foundObj ? foundObj.label : dateStr;
+                let label = foundObj ? foundObj.label : dateStr.split('-').reverse().slice(0,2).join('/');
                 headerHtml += `<div><span style="font-size:10px; font-weight:bold">${label}</span></div>`;
             });
             document.getElementById('headerGridDays').innerHTML = headerHtml;
