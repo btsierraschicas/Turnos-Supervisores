@@ -16,8 +16,13 @@
             --am-text: #38bdf8;
             --pm-bg: rgba(245, 158, 11, 0.2);
             --pm-text: #fbbf24;
-            --guardia-bg: rgba(239, 68, 68, 0.25);
+            --guardia-bg: rgba(239, 68, 68, 0.2);
             --guardia-text: #f87171;
+            /* Nuevos tonos corporativos celestes para la placa de guardia */
+            --corp-plaque-bg: linear-gradient(145deg, #0b2238, #0e2e4d);
+            --corp-plaque-border: rgba(0, 163, 224, 0.6);
+            --corp-badge-bg: rgba(0, 163, 224, 0.2);
+            --corp-badge-text: #38bdf8;
             --franco-bg: rgba(100, 116, 139, 0.2);
             --franco-text: #94a3b8;
         }
@@ -171,22 +176,22 @@
             margin-top: 1px;
         }
 
-        /* Tarjeta imponente estilo Placa Informativa para Guardia (Con identidad de color Guardia) */
+        /* Tarjeta imponente estilo Placa Informativa para Guardia (Tono Celeste Corporativo) */
         .guard-plaque-card {
-            background: linear-gradient(145deg, #161118, #22141a);
-            border: 2px solid rgba(248, 113, 113, 0.5);
+            background: var(--corp-plaque-bg);
+            border: 2px solid var(--corp-plaque-border);
             border-radius: 14px;
             padding: 16px;
             margin-bottom: 14px;
-            box-shadow: 0 8px 24px rgba(239, 68, 68, 0.2);
+            box-shadow: 0 8px 24px rgba(0, 163, 224, 0.2);
             text-align: center;
         }
 
         .plaque-day-badge {
             display: inline-block;
-            background: var(--guardia-bg);
-            border: 1px solid rgba(248, 113, 113, 0.4);
-            color: var(--guardia-text);
+            background: var(--corp-badge-bg);
+            border: 1px solid rgba(0, 163, 224, 0.4);
+            color: var(--corp-badge-text);
             font-size: 11px;
             font-weight: 800;
             padding: 4px 12px;
@@ -205,12 +210,12 @@
             letter-spacing: 0.5px;
         }
 
-        /* Insignia AM + PM destacada en rojo guardia */
+        /* Insignia AM + PM destacada en celeste corporativo */
         .plaque-shift-badge {
             display: inline-block;
-            background: var(--guardia-bg);
-            color: var(--guardia-text);
-            border: 1px solid rgba(248, 113, 113, 0.5);
+            background: var(--corp-badge-bg);
+            color: var(--corp-badge-text);
+            border: 1px solid rgba(0, 163, 224, 0.5);
             font-size: 12px;
             font-weight: 900;
             padding: 5px 14px;
@@ -234,7 +239,7 @@
         }
         
         .plaque-sector strong {
-            color: var(--guardia-text);
+            color: var(--accent-blue);
             font-weight: 900;
         }
 
