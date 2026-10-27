@@ -317,13 +317,12 @@
         }
 
         .sup-info .sup-name {
-            font-size: 13px;
-            font-weight: 900;
+            font-size: 12px;
+            font-weight: 800;
             color: var(--text-main);
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
-            text-transform: uppercase;
         }
 
         .sup-info .sup-area {
@@ -696,11 +695,10 @@
                 html += `</div><div id="rowsSupervisorsContainer">`;
 
                 supervisorsList.forEach(sup => {
-                    let supNameUpper = sup.name.toUpperCase();
                     html += `
                         <div class="supervisor-row" style="grid-template-columns: ${colWidths};">
                             <div class="sup-info">
-                                <div class="sup-name">${supNameUpper}</div>
+                                <div class="sup-name">${sup.name}</div>
                                 <div class="sup-area">${sup.area}</div>
                                 <div class="sup-contact-icons">
                                     <a href="https://wa.me/${sup.phone}" target="_blank" class="contact-btn" title="Enviar WhatsApp">
@@ -739,7 +737,6 @@
                 document.getElementById('lblSubSemana').innerText = daysArr.length > 1 ? `Bloque fin de semana / Guardia` : `Modo técnico (Día actual)`;
 
                 if (daysArr.length > 1) {
-                    // Agrupar qué días trabaja cada supervisor en este bloque y ordenar por fecha
                     let supervisorSchedules = {};
 
                     supervisorsList.forEach(sup => {
@@ -759,7 +756,6 @@
                         });
 
                         if (workingDaysList.length > 0) {
-                            // Construir texto legible agrupando o listando los días
                             let daysTextFormatted = "";
                             if (workingDaysList.length === 1) {
                                 daysTextFormatted = workingDaysList[0].text;
@@ -781,7 +777,7 @@
                     let plaquesHtml = '';
                     Object.values(supervisorSchedules).forEach(item => {
                         let sup = item.supervisor;
-                        let supNameUpper = sup.name.toUpperCase();
+                        let supNameUpper = sup.name.toUpperCase(); // Mantiene mayúsculas solo en la tarjeta imponente de guardia
                         plaquesHtml += `
                             <div class="guard-plaque-card">
                                 <div class="plaque-day-badge">${item.daysText}</div>
@@ -822,11 +818,10 @@
                     html += `</div><div id="rowsSupervisorsContainer">`;
 
                     supervisorsList.forEach(sup => {
-                        let supNameUpper = sup.name.toUpperCase();
                         html += `
                             <div class="supervisor-row" style="grid-template-columns: ${colWidths};">
                                 <div class="sup-info">
-                                    <div class="sup-name">${supNameUpper}</div>
+                                    <div class="sup-name">${sup.name}</div>
                                     <div class="sup-area">${sup.area}</div>
                                     <div class="sup-contact-icons">
                                         <a href="https://wa.me/${sup.phone}" target="_blank" class="contact-btn" title="Enviar WhatsApp">
@@ -842,27 +837,4 @@
                             let dayData = rawSchedule[dateStr] || {};
                             let val = dayData[sup.key] || "";
                             let badgeClass = "badge-empty";
-                            let displayText = "-";
-
-                            if (val === "AM") { badgeClass = "badge-am"; displayText = "AM"; }
-                            else if (val === "PM") { badgeClass = "badge-pm"; displayText = "PM"; }
-                            else if (val === "G") { badgeClass = "badge-guardia"; displayText = "AM<br>PM"; }
-                            else if (val === "FC") { badgeClass = "badge-franco"; displayText = "FC"; }
-                            else if (val === "VAC") { badgeClass = "badge-franco"; displayText = "VAC"; }
-
-                            html += `<div class="shift-cell ${badgeClass}">${displayText}</div>`;
-                        });
-
-                        html += `</div>`;
-                    });
-
-                    html += `</div></div>`;
-                    container.innerHTML = html;
-                }
-            }
-        }
-
-        loadSheetData();
-    </script>
-</body>
-</html>
+                            let displayText =
