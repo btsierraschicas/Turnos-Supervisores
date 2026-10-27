@@ -99,6 +99,31 @@
             border: 1px solid rgba(0, 163, 224, 0.3);
         }
 
+        /* Botón de alternancia (Solo visible en Modo Supervisor desbloqueado) */
+        .mode-toggle-bar {
+            display: none;
+            justify-content: center;
+            margin-bottom: 10px;
+        }
+        .mode-toggle-bar.active {
+            display: flex;
+        }
+        .toggle-btn {
+            background: linear-gradient(135deg, #00a3e0, #0077a3);
+            color: #fff;
+            border: none;
+            padding: 7px 16px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 700;
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(0, 163, 224, 0.3);
+            transition: opacity 0.2s;
+        }
+        .toggle-btn:active {
+            opacity: 0.8;
+        }
+
         /* Selector de días / semanas */
         .date-navigator {
             background: var(--card-bg);
@@ -286,6 +311,11 @@
             <div class="personal-logo">personal</div>
         </header>
 
+        <!-- BOTÓN DE ALTERNANCIA (MODO TÉCNICO / MODO SUPERVISOR) -->
+        <div id="modeToggleBar" class="mode-toggle-bar">
+            <button class="toggle-btn" id="toggleModeBtn" onclick="toggleViewMode()">Cambiar a Modo Supervisor</button>
+        </div>
+
         <!-- SELECTOR DE DÍAS / SEMANAS -->
         <div id="dateNavigator" class="date-navigator">
             <button class="nav-arrow" onclick="navigate(-1)">&#10094;</button>
@@ -323,7 +353,8 @@
         let availableDates = [];
         let currentIndex = 0; 
         let baseWeekDate = new Date(); 
-        let isUnlocked = false; 
+        let isAuthorized = false; // Contraseña ingresada
+        let isSupervisorMode = false; // Estado actual (false = modo técnico, true = modo supervisor)
         let pClickCount = 0;
 
         async function loadSheetData() {
@@ -430,14 +461,17 @@
             return `${year}-${month}-${day}`;
         }
 
+        // 5 toques en la P para solicitar contraseña
         function handleLogoClick() {
             pClickCount++;
             if (pClickCount >= 5) {
                 pClickCount = 0;
                 let pin = prompt("INGRESE CONTRASEÑA DE MODO SUPERVISOR:");
                 if (pin === "1234") {
-                    isUnlocked = true;
+                    isAuthorized = true;
+                    isSupervisorMode = true; // Activa modo supervisor por defecto al ingresar
                     alert("¡BIENVENIDO!");
+                    document.getElementById('modeToggleBar').classList.add('active');
                     renderApp();
                 } else if (pin !== null) {
                     alert("Contraseña incorrecta.");
@@ -447,8 +481,20 @@
             }
         }
 
+        // Botón para alternar entre Modo Técnico y Modo Supervisor
+        function toggleViewMode() {
+            isSupervisorMode = !isSupervisorMode;
+            let btn = document.getElementById('toggleModeBtn');
+            if (isSupervisorMode) {
+                btn.innerText = "Cambiar a Modo Técnico";
+            } else {
+                btn.innerText = "Cambiar a Modo Supervisor";
+            }
+            renderApp();
+        }
+
         function navigate(direction) {
-            if (isUnlocked) {
+            if (isSupervisorMode) {
                 baseWeekDate.setDate(baseWeekDate.getDate() + (direction * 7));
             } else {
                 let currentItem = availableDates[currentIndex];
@@ -470,8 +516,10 @@
             renderApp();
         }
 
+        // Lógica de días a mostrar según los requerimientos
         function getDaysToDisplay() {
-            if (isUnlocked) {
+            if (isSupervisorMode) {
+                // Modo supervisor: Muestra toda la semana de lunes a domingo
                 let d = new Date(baseWeekDate);
                 let day = d.getDay();
                 let diffToMonday = d.getDate() - day + (day === 0 ? -6 : 1);
@@ -484,42 +532,60 @@
                 }
                 return weekArr;
             } else {
+                // Modo técnico: Lunes a viernes muestra 1 día. Sábado muestra sábado, domingo y opcionalmente un día extra si hay "G"
                 let currentItem = availableDates[currentIndex];
                 if (!currentItem) return [];
                 
                 let targetDateStr = currentItem.dateStr;
                 let p = targetDateStr.split('-');
                 let targetDate = new Date(p[0], p[1] - 1, p[2]);
-                let dayOfWeek = targetDate.getDay(); 
+                let dayOfWeek = targetDate.getDay(); // 0: Dom, 6: Sáb, 1-5: Lunes a Viernes
 
-                let hasGuardNearby = false;
-                let scanStart = new Date(targetDate);
-                scanStart.setDate(scanStart.getDate() - 1);
-                for(let i=0; i<3; i++) {
-                    let checkD = new Date(scanStart);
-                    checkD.setDate(scanStart.getDate() + i);
-                    let cKey = formatDateKey(checkD);
-                    if(rawSchedule[cKey]) {
-                        Object.values(rawSchedule[cKey]).forEach(val => {
-                            if(val === "G") hasGuardNearby = true;
-                        });
-                    }
+                // Si es Lunes a Viernes (1 al 5): Muestra estrictamente 1 solo día
+                if (dayOfWeek >= 1 && dayOfWeek <= 5) {
+                    return [targetDateStr];
                 }
 
-                if (dayOfWeek === 0 || dayOfWeek === 6 || hasGuardNearby) {
-                    let activeDays = [];
-                    let blockStart = new Date(targetDate);
-                    blockStart.setDate(blockStart.getDate() - 1);
+                // Si es Sábado (6) o Domingo (0): Muestra fin de semana (sábado y domingo)
+                // Y verificamos si hay una "G" (Guardia) pegada (viernes anterior o lunes siguiente)
+                let activeDays = [];
+                
+                if (dayOfWeek === 6) { // Es Sábado
+                    let satKey = targetDateStr;
+                    let sunDate = new Date(targetDate); sunDate.setDate(targetDate.getDate() + 1);
+                    let sunKey = formatDateKey(sunDate);
                     
-                    for(let i=0; i<3; i++) {
-                        let currentD = new Date(blockStart);
-                        currentD.setDate(blockStart.getDate() + i);
-                        let cKey = formatDateKey(currentD);
-                        if(availableDates.some(d => d.dateStr === cKey)) {
-                            activeDays.push(cKey);
-                        }
+                    activeDays = [satKey];
+                    if(availableDates.some(d => d.dateStr === sunKey)) activeDays.push(sunKey);
+
+                    // Verificar si el viernes anterior tiene "G"
+                    let friDate = new Date(targetDate); friDate.setDate(targetDate.getDate() - 1);
+                    let friKey = formatDateKey(friDate);
+                    if(rawSchedule[friKey] && Object.values(rawSchedule[friKey]).includes("G")) {
+                        if(availableDates.some(d => d.dateStr === friKey)) activeDays.unshift(friKey); // Agregar al inicio (viernes)
                     }
-                    if(activeDays.length >= 2) return activeDays;
+                    // Verificar si el lunes siguiente tiene "G"
+                    let monDate = new Date(targetDate); monDate.setDate(targetDate.getDate() + 2);
+                    let monKey = formatDateKey(monDate);
+                    if(rawSchedule[monKey] && Object.values(rawSchedule[monKey]).includes("G")) {
+                        if(availableDates.some(d => d.dateStr === monKey)) activeDays.push(monKey); // Agregar al final (lunes)
+                    }
+                    return activeDays;
+                } else if (dayOfWeek === 0) { // Si justo abre en Domingo
+                    let satDate = new Date(targetDate); satDate.setDate(targetDate.getDate() - 1);
+                    let satKey = formatDateKey(satDate);
+                    let sunKey = targetDateStr;
+                    
+                    activeDays = [];
+                    if(availableDates.some(d => d.dateStr === satKey)) activeDays.push(satKey);
+                    activeDays.push(sunKey);
+
+                    let monDate = new Date(targetDate); monDate.setDate(targetDate.getDate() + 1);
+                    let monKey = formatDateKey(monDate);
+                    if(rawSchedule[monKey] && Object.values(rawSchedule[monKey]).includes("G")) {
+                        if(availableDates.some(d => d.dateStr === monKey)) activeDays.push(monKey);
+                    }
+                    return activeDays;
                 }
 
                 return [targetDateStr];
@@ -531,16 +597,15 @@
 
             let daysArr = getDaysToDisplay();
 
-            if (isUnlocked) {
+            if (isSupervisorMode) {
                 document.getElementById('lblRangoFechas').innerText = `MODO SUPERVISOR (SEMANA)`;
                 document.getElementById('lblSubSemana').innerText = `Auditoría activa`;
             } else {
                 let currentItem = availableDates[currentIndex];
                 document.getElementById('lblRangoFechas').innerText = currentItem ? `${currentItem.dayNum} ${currentItem.monthName}` : "FECHA";
-                document.getElementById('lblSubSemana').innerText = daysArr.length > 1 ? `Bloque fin de semana / Guardia` : `Modo técnico`;
+                document.getElementById('lblSubSemana').innerText = daysArr.length > 1 ? `Bloque fin de semana / Guardia` : `Modo técnico (Día actual)`;
             }
 
-            // Columna de nombres ajustada a 115px para que los 7 días entren holgados sin deslizar
             let colWidths = `115px ` + `repeat(${daysArr.length}, 1fr)`;
             document.getElementById('headerGridDays').style.gridTemplateColumns = colWidths;
 
@@ -548,7 +613,6 @@
             daysArr.forEach((dateStr) => {
                 let foundObj = availableDates.find(d => d.dateStr === dateStr);
                 if (foundObj) {
-                    // Muestra el Mes arriba pequeño y el número de día abajo grande
                     headerHtml += `<div><span style="font-size:8px; color:var(--text-muted); display:block;">${foundObj.monthName}</span><span style="font-size:11px; font-weight:800;">${foundObj.dayNum}</span></div>`;
                 } else {
                     headerHtml += `<div><span>${dateStr}</span></div>`;
@@ -589,7 +653,7 @@
                         displayText = "PM";
                     } else if (val === "G") {
                         badgeClass = "badge-guardia";
-                        displayText = "AM<br>PM"; // AM arriba y PM abajo
+                        displayText = "AM<br>PM";
                     } else if (val === "FC") {
                         badgeClass = "badge-franco";
                         displayText = "FC";
