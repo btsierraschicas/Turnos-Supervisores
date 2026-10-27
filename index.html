@@ -205,6 +205,20 @@
             letter-spacing: 0.5px;
         }
 
+        /* Insignia AM + PM estilo grilla abajo del nombre */
+        .plaque-shift-badge {
+            display: inline-block;
+            background: var(--guardia-bg);
+            color: var(--guardia-text);
+            border: 1px solid rgba(248, 113, 113, 0.35);
+            font-size: 11px;
+            font-weight: 800;
+            padding: 4px 12px;
+            border-radius: 6px;
+            margin-bottom: 10px;
+            letter-spacing: 0.5px;
+        }
+
         .plaque-sector {
             font-size: 11px;
             font-weight: 700;
@@ -212,8 +226,9 @@
             background: rgba(255, 255, 255, 0.05);
             padding: 4px 10px;
             border-radius: 5px;
-            display: inline-block;
-            margin-bottom: 12px;
+            display: block;
+            width: fit-content;
+            margin: 0 auto 12px auto;
             letter-spacing: 0.5px;
             border: 1px solid var(--card-border);
         }
@@ -769,7 +784,7 @@
 
                             supervisorSchedules[sup.key] = {
                                 supervisor: sup,
-                                daysText: `${daysTextFormatted} • AM + PM`
+                                daysText: daysTextFormatted
                             };
                         }
                     });
@@ -777,11 +792,11 @@
                     let plaquesHtml = '';
                     Object.values(supervisorSchedules).forEach(item => {
                         let sup = item.supervisor;
-                        let supNameUpper = sup.name.toUpperCase(); // Mantiene mayúsculas solo en la tarjeta imponente de guardia
                         plaquesHtml += `
                             <div class="guard-plaque-card">
                                 <div class="plaque-day-badge">${item.daysText}</div>
-                                <div class="plaque-name">${supNameUpper}</div>
+                                <div class="plaque-name">${sup.name}</div>
+                                <div class="plaque-shift-badge">AM + PM</div>
                                 <div class="plaque-sector">SECTOR: <strong>EVENTOS + REDES</strong></div>
                                 <div class="plaque-info-box">
                                     <span>Celular:</span> ${sup.cleanPhone}<br>
