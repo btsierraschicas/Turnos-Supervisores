@@ -354,7 +354,7 @@
                 <!-- Dinámico -->
             </div>
             <div id="rowsSupervisorsContainer">
-                <div style="text-align:center; padding: 20px; color:var(--text-muted);">Sincronizando con Google Sheets...</div>
+                <div style="text-align:center; padding: 20px; color:var(--text-muted);">Sincronizando con Google Apps Script...</div>
             </div>
         </div>
 
@@ -378,7 +378,7 @@
     </div>
 
     <script>
-        const PUB_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQZmObQ2qBz4Gv20y8QNI-4i3EckM4eun9ASB3LCtULdSIsNdKNivdc8q6NHbsdR7wgOSFVpJEdoCIL/pub?output=csv&gid=1006208214";
+        const API_URL = "https://script.google.com/macros/s/AKfycbzteLGryKx4kSM6cisczuYjauFyZKHP8j1F6QP19mLnIJbl2BU7VKTXF2kGXPwrgwY/exec";
 
         const supervisorsList = [
             { key: "QUIROGA", name: "Quiroga Lucas", phone: "5493515923910", email: "lquiroga@personal.com.ar" },
@@ -388,17 +388,16 @@
         ];
 
         let rawSchedule = {};
-        let availableDates = []; // Lista de objetos {dateStr: '2026-10-26', label: '26-oct'}
-        let baseDate = new Date(); // Apuntará a la fecha actual o la primera disponible
+        let availableDates = [];
+        let baseDate = new Date();
         let isUnlocked = false;
 
         async function loadSheetData() {
             try {
-                const response = await fetch(PUB_CSV_URL);
-                const text = await response.text();
-                parseCSV(text);
+                const response = await fetch(API_URL);
+                const rows = await response.json();
+                parseSheetRows(rows);
                 
-                // Si hoy no está en el sheet, usar la primera fecha disponible
                 if (availableDates.length > 0) {
                     let todayKey = formatDateKey(new Date());
                     let found = availableDates.find(d => d.dateStr === todayKey);
@@ -409,22 +408,21 @@
                 
                 renderApp();
             } catch (error) {
-                console.error("Error al cargar Google Sheet:", error);
+                console.error("Error al cargar desde Apps Script:", error);
                 document.getElementById('rowsSupervisorsContainer').innerHTML = 
-                    `<div style="text-align:center; padding:15px; color:#f87171; font-size:11px;">Error al conectar con Google Sheets.</div>`;
+                    `<div style="text-align:center; padding:15px; color:#f87171; font-size:11px;">Error al conectar con Apps Script.</div>`;
             }
         }
 
-        function parseCSV(csvText) {
-            const lines = csvText.split('\n');
-            if (lines.length < 2) return;
+        function parseSheetRows(rows) {
+            if (!rows || rows.length < 2) return;
 
-            const headers = parseCSVLine(lines[0]);
+            // Fila 0 tiene las cabeceras (fechas)
+            const headers = rows[0];
             availableDates = [];
 
-            // Detectar columnas de fechas (desde la columna C en adelante, índice 2)
             for (let c = 2; c < headers.length; c++) {
-                let h = headers[c].trim().replace(/^["']|["']$/g, '');
+                let h = String(headers[c]).trim();
                 if (h) {
                     let normalized = parseSpanishDate(h);
                     if (normalized) {
@@ -433,11 +431,11 @@
                 }
             }
 
-            // Procesar filas de supervisores
-            for (let r = 1; r < lines.length; r++) {
-                let row = parseCSVLine(lines[r]);
-                if (row.length < 2) continue;
-                let supNameRaw = row[1] ? row[1].trim().toUpperCase().replace(/["']/g, '') : "";
+            // Procesar filas de supervisores (desde la fila 1 en adelante)
+            for (let r = 1; r < rows.length; r++) {
+                let row = rows[r];
+                if (!row || row.length < 2) continue;
+                let supNameRaw = row[1] ? String(row[1]).trim().toUpperCase() : "";
 
                 let supKey = "";
                 if (supNameRaw.includes("QUIROGA")) supKey = "QUIROGA";
@@ -447,7 +445,7 @@
 
                 if (supKey) {
                     availableDates.forEach(item => {
-                        let val = row[item.colIndex] ? row[item.colIndex].trim().replace(/["']/g, '') : "";
+                        let val = row[item.colIndex] ? String(row[item.colIndex]).trim() : "";
                         if (!rawSchedule[item.dateStr]) {
                             rawSchedule[item.dateStr] = {};
                         }
@@ -457,26 +455,6 @@
             }
         }
 
-        function parseCSVLine(text) {
-            let result = [];
-            let current = '';
-            let inQuotes = false;
-            for (let i = 0; i < text.length; i++) {
-                let char = text[i];
-                if (char === '"') {
-                    inQuotes = !inQuotes;
-                } else if (char === ',' && !inQuotes) {
-                    result.push(current);
-                    current = '';
-                } else {
-                    current += char;
-                }
-            }
-            result.push(current);
-            return result;
-        }
-
-        // Convierte formatos como "26-oct" o "15-ago" al año actual (2026) -> "2026-10-26"
         function parseSpanishDate(str) {
             str = str.toLowerCase().trim();
             const months = { 'ene': '01', 'feb': '02', 'mar': '03', 'abr': '04', 'may': '05', 'jun': '06', 'jul': '07', 'ago': '08', 'sep': '09', 'oct': '10', 'nov': '11', 'dic': '12' };
@@ -607,7 +585,6 @@
                 daysArr.forEach(dateStr => {
                     let dayData = rawSchedule[dateStr] || {};
                     let val = dayData[sup.key] || "";
-                    let isWknd = false; // ya manejado por formato
 
                     let badgeClass = "badge-empty";
                     let displayText = "-";
