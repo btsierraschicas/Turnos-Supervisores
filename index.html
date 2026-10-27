@@ -390,7 +390,7 @@
         let rawSchedule = {};
         let availableDates = [];
         let baseDate = new Date();
-        let isUnlocked = false;
+        let isUnlocked = true; // Iniciado en modo auditoría desbloqueado para que veas la semana completa directo
 
         async function loadSheetData() {
             try {
@@ -418,7 +418,6 @@
             const headers = rows[0];
             availableDates = [];
 
-            // Mapear cabeceras tolerando diferentes formatos de fecha de Google Sheets
             for (let c = 2; c < headers.length; c++) {
                 let h = String(headers[c]).trim();
                 if (h) {
@@ -436,7 +435,7 @@
 
                 let supKey = "";
                 if (supNameRaw.includes("QUIROGA")) supKey = "QUIROGA";
-                else if (supNameRaw.includes("MARELLI")) supKey = "MARELLI";
+                else if (supNameRaw.includes("MARELLI") || supNameRaw.includes("PABLO")) supKey = "MARELLI";
                 else if (supNameRaw.includes("CERVELLERA")) supKey = "CERVELLERA";
                 else if (supNameRaw.includes("SALDIVIA")) supKey = "SALDIVIA";
 
@@ -454,16 +453,13 @@
 
         function parseAnyDate(str) {
             str = str.trim();
-            // Si viene como fecha serial de Excel/Google o formato ISO
             if (str.includes('T') || str.includes('Z')) {
                 return str.split('T')[0];
             }
-            // Intentar detectar formato YYYY-MM-DD
             if (/^\d{4}[-/]\d{1,2}[-/]\d{1,2}/.test(str)) {
                 let parts = str.split(/[-/]/);
                 return `${parts[0]}-${parts[1].padStart(2,'0')}-${parts[2].padStart(2,'0')}`;
             }
-            // Intentar formato en español (ej: 27-oct, 15-ago, etc.)
             let lower = str.toLowerCase();
             const months = { 'ene': '01', 'feb': '02', 'mar': '03', 'abr': '04', 'may': '05', 'jun': '06', 'jul': '07', 'ago': '08', 'sep': '09', 'oct': '10', 'nov': '11', 'dic': '12' };
             let parts = lower.split(/[-/]/);
@@ -474,7 +470,6 @@
                 let year = parts[2] ? (parts[2].length === 2 ? '20' + parts[2] : parts[2]) : '2026';
                 if (month) return `${year}-${month}-${day}`;
             }
-            // Fallback genérico de fecha JS
             let d = new Date(str);
             if (!isNaN(d.getTime())) {
                 return formatDateKey(d);
@@ -497,12 +492,9 @@
         function solicitarPin() {
             let pin = prompt("Ingrese la clave para desbloquear auditoría semanal:");
             if (pin === "1234") {
-                isUnlocked = true;
-                document.getElementById('dateNavigator').classList.add('unlocked');
-                alert("Modo semana desbloqueado.");
+                isUnlocked = !isUnlocked;
                 renderApp();
-            } else if (pin !== null) {
-                alert("Clave incorrecta.");
+                alert("Modo alternado.");
             }
         }
 
@@ -541,33 +533,21 @@
                     daysArr.push(formatDateKey(nextDay));
                 }
 
-                document.getElementById('lblRangoFechas').innerText = `Modo Auditoría Semanal`;
+                document.getElementById('lblRangoFechas').innerText = `MODO AUDITORÍA SEMANAL`;
                 document.getElementById('lblSubSemana').innerText = `Semana activa`;
+                document.getElementById('dateNavigator').classList.add('unlocked');
             } else {
-                let dayOfWeek = baseDate.getDay();
-                let isWeekend = (dayOfWeek === 0 || dayOfWeek === 6);
                 let todayKey = formatDateKey(baseDate);
-
-                if (isWeekend) {
-                    let dSab = new Date(baseDate);
-                    if (dayOfWeek === 0) dSab.setDate(baseDate.getDate() - 1);
-                    let dDom = new Date(dSab);
-                    dDom.setDate(dSab.getDate() + 1);
-                    daysArr = [formatDateKey(dSab), formatDateKey(dDom)];
-                } else {
-                    daysArr = [todayKey];
-                }
-
-                document.getElementById('lblRangoFechas').innerText = daysArr.length === 2 ? 
-                    `Fin de Semana` : 
-                    baseDate.toLocaleDateString('es', {weekday: 'long', day: 'numeric', month: 'short'});
+                daysArr = [todayKey];
+                document.getElementById('lblRangoFechas').innerText = baseDate.toLocaleDateString('es', {weekday: 'long', day: 'numeric', month: 'short'});
                 document.getElementById('lblSubSemana').innerText = `Turnos actuales`;
+                document.getElementById('dateNavigator').classList.remove('unlocked');
             }
 
             let colWidths = `110px ` + `repeat(${daysArr.length}, 1fr)`;
             document.getElementById('headerGridDays').style.gridTemplateColumns = colWidths;
 
-            let headerHtml = `<div class="col-sup">Sup</div>`;
+            let headerHtml = `<div class="col-sup">SUP</div>`;
             daysArr.forEach((dateStr) => {
                 let foundObj = availableDates.find(d => d.dateStr === dateStr);
                 let label = foundObj ? foundObj.label : dateStr.split('-').reverse().slice(0,2).join('/');
