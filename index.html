@@ -837,4 +837,27 @@
                             let dayData = rawSchedule[dateStr] || {};
                             let val = dayData[sup.key] || "";
                             let badgeClass = "badge-empty";
-                            let displayText =
+                            let displayText = "-";
+
+                            if (val === "AM") { badgeClass = "badge-am"; displayText = "AM"; }
+                            else if (val === "PM") { badgeClass = "badge-pm"; displayText = "PM"; }
+                            else if (val === "G") { badgeClass = "badge-guardia"; displayText = "AM<br>PM"; }
+                            else if (val === "FC") { badgeClass = "badge-franco"; displayText = "FC"; }
+                            else if (val === "VAC") { badgeClass = "badge-franco"; displayText = "VAC"; }
+
+                            html += `<div class="shift-cell ${badgeClass}">${displayText}</div>`;
+                        });
+
+                        html += `</div>`;
+                    });
+
+                    html += `</div></div>`;
+                    container.innerHTML = html;
+                }
+            }
+        }
+
+        loadSheetData();
+    </script>
+</body>
+</html>
