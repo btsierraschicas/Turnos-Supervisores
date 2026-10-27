@@ -398,7 +398,7 @@
         let rawSchedule = {};
         let availableDates = [];
         let baseDate = new Date();
-        let isUnlocked = false; // Arranca bloqueado mostrando 1 solo día por defecto
+        let isUnlocked = false; // Bloqueado por defecto mostrando 1 solo día
 
         async function loadSheetData() {
             try {
@@ -431,7 +431,9 @@
                 if (h) {
                     let normalized = parseAnyDate(h);
                     if (normalized) {
-                        availableDates.push({ colIndex: c, dateStr: normalized, label: h.split('T')[0] });
+                        // Formatear etiqueta corta sin año (ej: "26-oct")
+                        let shortLabel = formatShortDateLabel(normalized);
+                        availableDates.push({ colIndex: c, dateStr: normalized, label: shortLabel });
                     }
                 }
             }
@@ -458,6 +460,13 @@
                     });
                 }
             }
+        }
+
+        function formatShortDateLabel(dateStr) {
+            let p = dateStr.split('-');
+            let year = p[0], month = p[1], day = p[2];
+            const months = { '01': 'ene', '02': 'feb', '03': 'mar', '04': 'abr', '05': 'may', '06': 'jun', '07': 'jul', '08': 'ago', '09': 'sep', '10': 'oct', '11': 'nov', '12': 'dic' };
+            return `${parseInt(day)}-${months[month] || month}`;
         }
 
         function parseAnyDate(str) {
@@ -530,12 +539,11 @@
             }
         }
 
-        // Determina si hay guardia (G) en los días cercanos para expandir fin de semana/feriados
+        // Lógica inteligente para fin de semana o feriados con Guardia (G) cercana
         function getSmartDaysArray(targetDate) {
             let dKey = formatDateKey(targetDate);
-            let dayOfWeek = targetDate.getDay(); // 0: Dom, 6: Sáb, 5: Vie, 1: Lun, 2: Mar
+            let dayOfWeek = targetDate.getDay(); // 0: Dom, 6: Sáb
 
-            // Si está desbloqueado el modo auditoría semanal, devuelve toda la semana completa
             if (isUnlocked) {
                 let d = new Date(targetDate);
                 let day = d.getDay();
@@ -550,53 +558,39 @@
                 return weekArr;
             }
 
-            // --- LÓGICA INTELIGENTE DE FIN DE SEMANA Y FERIADOS CON GUARDIA (G) ---
-            // Verificamos si algún supervisor tiene "G" (Guardia) cerca (Viernes a Lunes/Martes)
-            let hasGuardDutyNearby = false;
-            let checkRangeDays = [];
-            
-            // Construimos un rango de análisis amplio alrededor del día actual
-            let startScan = new Date(targetDate);
-            startScan.setDate(startScan.getDate() - 2);
-            for(let i=0; i<6; i++) {
-                let scanDate = new Date(startScan);
-                scanDate.setDate(startScan.getDate() + i);
-                let sKey = formatDateKey(scanDate);
-                if(rawSchedule[sKey]) {
-                    Object.values(rawSchedule[sKey]).forEach(val => {
-                        if(val === "G") hasGuardDutyNearby = true;
+            // Verificar si hay una Guardia (G) programada en un radio cercano (para fines de semana largos / feriados)
+            let hasGuardNearby = false;
+            let scanStart = new Date(targetDate);
+            scanStart.setDate(scanStart.getDate() - 1);
+            for(let i=0; i<3; i++) {
+                let checkD = new Date(scanStart);
+                checkD.setDate(scanStart.getDate() + i);
+                let cKey = formatDateKey(checkD);
+                if(rawSchedule[cKey]) {
+                    Object.values(rawSchedule[cKey]).forEach(val => {
+                        if(val === "G") hasGuardNearby = true;
                     });
                 }
             }
 
-            // Si es fin de semana (Sábado o Domingo) o hay una Guardia (G) próxima integrada al esquema
-            if (dayOfWeek === 0 || dayOfWeek === 6 || hasGuardDutyNearby) {
-                // Buscamos el lunes anterior o el viernes para armar el bloque de finde / feriado extendido
-                let d = new Date(targetDate);
-                let day = d.getDay();
-                // Encontrar el inicio del bloque (ej. Viernes si cae finde/guardia)
-                let diffToFriday = d.getDate() - day - (day === 0 ? 2 : 1); 
-                // Para simplificar y robustecer: si cae cerca de finde o guardia, mostramos un bloque dinámico de 3 o 4 días relevantes
+            // Si es fin de semana (Sábado/Domingo) o hay guardia cercana por feriado
+            if (dayOfWeek === 0 || dayOfWeek === 6 || hasGuardNearby) {
                 let activeDays = [];
-                
-                // Recorremos desde 1 día antes hasta 2 días después para capturar feriados / guardias pegadas
-                let baseBlock = new Date(targetDate);
-                baseBlock.setDate(baseBlock.getDate() - 1);
+                let blockStart = new Date(targetDate);
+                blockStart.setDate(blockStart.getDate() - 1); // Empezar un día antes por seguridad de puente/feriado
                 
                 for(let i=0; i<4; i++) {
-                    let currentD = new Date(baseBlock);
-                    currentD.setDate(baseBlock.getDate() + i);
+                    let currentD = new Date(blockStart);
+                    currentD.setDate(blockStart.getDate() + i);
                     let cKey = formatDateKey(currentD);
-                    // Solo incluir si existe en la planilla
-                    let dayHasData = rawSchedule[cKey] && Object.keys(rawSchedule[cKey]).length > 0;
-                    if(dayHasData || i < 3) {
+                    if(availableDates.some(d => d.dateStr === cKey)) {
                         activeDays.push(cKey);
                     }
                 }
                 if(activeDays.length >= 2) return activeDays;
             }
 
-            // Por defecto, muestra únicamente el día actual seleccionado
+            // Por defecto: Muestra únicamente el día actual en curso
             return [dKey];
         }
 
@@ -657,7 +651,7 @@
                         displayText = "PM";
                     } else if (val === "G") {
                         badgeClass = "badge-guardia";
-                        displayText = "AM/PM"; // Guardia transformada a AM/PM
+                        displayText = "AM/PM";
                     } else if (val === "FC") {
                         badgeClass = "badge-franco";
                         displayText = "FC";
