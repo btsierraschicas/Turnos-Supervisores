@@ -354,7 +354,7 @@
                 <!-- Dinámico -->
             </div>
             <div id="rowsSupervisorsContainer">
-                <div style="text-align:center; padding: 20px; color:var(--text-muted);">Sincronizando turnos...</div>
+                <div style="text-align:center; padding: 20px; color:var(--text-muted);">Conectando con Google Sheets...</div>
             </div>
         </div>
 
@@ -394,11 +394,10 @@
 
         async function loadSheetData() {
             try {
-                const response = await fetch(API_URL);
+                const response = await fetch(API_URL, { redirect: "follow" });
                 const rows = await response.json();
                 parseSheetRows(rows);
                 
-                // Guardar en memoria local del navegador (Cache de respaldo)
                 localStorage.setItem('cached_rows', JSON.stringify(rows));
 
                 if (availableDates.length > 0) {
@@ -410,14 +409,14 @@
                 }
                 renderApp();
             } catch (error) {
-                console.warn("Fallo temporal al conectar con Apps Script, usando caché local...", error);
+                console.warn("Usando caché de respaldo...", error);
                 let cached = localStorage.getItem('cached_rows');
                 if (cached) {
                     parseSheetRows(JSON.parse(cached));
                     renderApp();
                 } else {
                     document.getElementById('rowsSupervisorsContainer').innerHTML = 
-                        `<div style="text-align:center; padding:15px; color:#f87171; font-size:11px;">Error de conexión temporal. Reintente en unos segundos.</div>`;
+                        `<div style="text-align:center; padding:15px; color:#f87171; font-size:11px;">Error de conexión. Verifique la implementación del Apps Script.</div>`;
                 }
             }
         }
