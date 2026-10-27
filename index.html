@@ -171,70 +171,83 @@
             margin-top: 1px;
         }
 
-        /* Tarjeta imponente estilo Placa Informativa para Guardia */
+        /* Tarjeta imponente estilo Placa Informativa para Guardia (Borde armónico) */
         .guard-plaque-card {
             background: linear-gradient(145deg, #0f1d32, #132845);
-            border: 2px solid var(--guardia-text);
+            border: 1px solid var(--card-border);
             border-radius: 14px;
             padding: 16px;
-            margin-bottom: 12px;
-            box-shadow: 0 8px 24px rgba(239, 68, 68, 0.25);
+            margin-bottom: 14px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
             text-align: center;
         }
 
-        .plaque-header {
+        .plaque-day-badge {
+            display: inline-block;
+            background: rgba(0, 163, 224, 0.15);
+            border: 1px solid rgba(0, 163, 224, 0.3);
+            color: var(--am-text);
             font-size: 11px;
             font-weight: 800;
-            color: var(--guardia-text);
-            text-transform: uppercase;
-            letter-spacing: 1px;
+            padding: 3px 10px;
+            border-radius: 6px;
             margin-bottom: 6px;
+            text-transform: uppercase;
         }
 
         .plaque-name {
-            font-size: 20px;
+            font-size: 18px;
             font-weight: 900;
             color: #fff;
-            margin-bottom: 2px;
+            margin-bottom: 4px;
         }
 
         .plaque-sector {
-            font-size: 12px;
-            font-weight: 700;
-            color: var(--accent-blue);
-            text-transform: uppercase;
-            margin-bottom: 12px;
+            font-size: 13px;
+            font-weight: 900;
+            color: #38bdf8;
+            background: rgba(56, 189, 248, 0.12);
+            padding: 4px 10px;
+            border-radius: 6px;
+            display: inline-block;
+            margin-bottom: 10px;
+            letter-spacing: 0.5px;
+            border: 1px solid rgba(56, 189, 248, 0.3);
         }
 
-        .plaque-phone-box {
-            background: rgba(0, 0, 0, 0.3);
+        .plaque-info-box {
+            background: rgba(0, 0, 0, 0.25);
             border: 1px solid var(--card-border);
             border-radius: 8px;
             padding: 8px;
-            margin-bottom: 12px;
-            font-size: 15px;
-            font-weight: 800;
-            color: #fff;
-            letter-spacing: 0.5px;
+            margin-bottom: 10px;
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--text-main);
+        }
+
+        .plaque-info-box span {
+            color: var(--text-muted);
+            font-weight: 600;
         }
 
         .plaque-actions {
             display: flex;
             justify-content: center;
-            gap: 12px;
+            gap: 10px;
         }
 
         .plaque-btn {
             background: rgba(255, 255, 255, 0.08);
             border: 1px solid var(--card-border);
             border-radius: 8px;
-            padding: 8px 16px;
+            padding: 7px 14px;
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 6px;
             color: #fff;
             text-decoration: none;
-            font-size: 12px;
+            font-size: 11px;
             font-weight: 700;
             transition: background 0.2s;
         }
@@ -244,11 +257,11 @@
         }
 
         .plaque-btn svg {
-            width: 18px;
-            height: 18px;
+            width: 16px;
+            height: 16px;
         }
 
-        /* Cuadro unificado normal (para Modo Supervisor o días de semana) */
+        /* Cuadro unificado normal (Modo Supervisor) */
         .unified-card {
             background: var(--card-bg);
             border: 1px solid var(--card-border);
@@ -409,10 +422,10 @@
         const API_URL = "https://script.google.com/macros/s/AKfycbzteLGryKx4kSM6cisczuYjauFyZKHP8j1F6QP19mLnIJbl2BU7VKTXF2kGXPwrgwY/exec";
 
         const supervisorsList = [
-            { key: "QUIROGA", name: "Quiroga Lucas", area: "Redes", phone: "5493515923910", email: "lquiroga@personal.com.ar" },
-            { key: "MARELLI", name: "Marelli Pablo", area: "Redes", phone: "5493513570182", email: "pmarelli@personal.com.ar" },
-            { key: "CERVELLERA", name: "Cervellera Diego", area: "Eventos", phone: "5493543601730", email: "dmcervellera@personal.com.ar" },
-            { key: "SALDIVIA", name: "Saldivia Carlos", area: "Eventos", phone: "5493516146481", email: "cmsaldivia@personal.com.ar" }
+            { key: "QUIROGA", name: "Quiroga Lucas", area: "Redes", phone: "5493515923910", cleanPhone: "3515923910", email: "lquiroga@personal.com.ar" },
+            { key: "MARELLI", name: "Marelli Pablo", area: "Redes", phone: "5493513570182", cleanPhone: "3513570182", email: "pmarelli@personal.com.ar" },
+            { key: "CERVELLERA", name: "Cervellera Diego", area: "Eventos", phone: "5493543601730", cleanPhone: "3543601730", email: "dmcervellera@personal.com.ar" },
+            { key: "SALDIVIA", name: "Saldivia Carlos", area: "Eventos", phone: "5493516146481", cleanPhone: "3516146481", email: "cmsaldivia@personal.com.ar" }
         ];
 
         let rawSchedule = {};
@@ -458,7 +471,7 @@
                     let normalized = parseAnyDate(h);
                     if (normalized) {
                         let parsedObj = parseDateDetails(normalized);
-                        availableDates.push({ colIndex: c, dateStr: normalized, dayNum: parsedObj.dayNum, monthName: parsedObj.monthName });
+                        availableDates.push({ colIndex: c, dateStr: normalized, dayNum: parsedObj.dayNum, monthName: parsedObj.monthName, dayName: parsedObj.dayName });
                     }
                 }
             }
@@ -489,9 +502,11 @@
 
         function parseDateDetails(dateStr) {
             let p = dateStr.split('-');
-            let month = p[1], day = p[2];
+            let year = p[0], month = p[1], day = p[2];
+            let dObj = new Date(year, month - 1, day);
+            const daysNames = ['DOMINGO', 'LUNES', 'MARTES', 'MIÉRCOLES', 'JUEVES', 'VIERNES', 'SÁBADO'];
             const months = { '01': 'ENE', '02': 'FEB', '03': 'MAR', '04': 'ABR', '05': 'MAY', '06': 'JUN', '07': 'JUL', '08': 'AGO', '09': 'SEP', '10': 'OCT', '11': 'NOV', '12': 'DIC' };
-            return { dayNum: parseInt(day), monthName: months[month] || month };
+            return { dayNum: parseInt(day), monthName: months[month] || month, dayName: daysNames[dObj.getDay()] };
         }
 
         function parseAnyDate(str) {
@@ -580,7 +595,6 @@
             renderApp();
         }
 
-        // Lógica inteligente y dinámica para bloques de fin de semana y feriados extendidos con "G"
         function getDaysToDisplay() {
             if (isSupervisorMode) {
                 let d = new Date(baseWeekDate);
@@ -601,20 +615,13 @@
                 let targetDateStr = currentItem.dateStr;
                 let p = targetDateStr.split('-');
                 let targetDate = new Date(p[0], p[1] - 1, p[2]);
-                let dayOfWeek = targetDate.getDay(); // 0: Dom, 6: Sáb, 1-5: Lun-Vie
+                let dayOfWeek = targetDate.getDay(); 
 
-                // Si es Lunes a Viernes y NO tiene guardia (G), muestra estrictamente 1 día
                 let hasTodayGuard = rawSchedule[targetDateStr] && Object.values(rawSchedule[targetDateStr]).includes("G");
                 if (dayOfWeek >= 1 && dayOfWeek <= 5 && !hasTodayGuard) {
                     return [targetDateStr];
                 }
 
-                // Si es fin de semana (Sáb/Dom) o hay feriado/guardia conectada: expandimos dinámicamente el bloque
-                // Buscamos hacia atrás y hacia adelante todos los días contiguos que tengan turnos de fin de semana o Guardia (G)
-                let blockDays = [];
-                let scanDate = new Date(targetDate);
-                
-                // Recorremos hacia atrás hasta 3 días para capturar viernes o feriados previos con G
                 let backwardDays = [];
                 for (let i = 1; i <= 3; i++) {
                     let prevD = new Date(targetDate);
@@ -629,7 +636,6 @@
                     }
                 }
 
-                // Recorremos hacia adelante hasta 3 días para capturar lunes, martes o feriados siguientes con G
                 let forwardDays = [];
                 for (let i = 1; i <= 3; i++) {
                     let nextD = new Date(targetDate);
@@ -644,9 +650,7 @@
                     }
                 }
 
-                // Unimos todo el bloque dinámico ordenado cronológicamente
                 let combined = [...backwardDays, targetDateStr, ...forwardDays];
-                // Filtramos solo los días que existan en la planilla y eliminamos duplicados
                 let uniqueDays = [...new Set(combined)].filter(dStr => availableDates.some(d => d.dateStr === dStr));
 
                 if (uniqueDays.length >= 2 || hasTodayGuard) {
@@ -720,41 +724,47 @@
                 container.innerHTML = html;
 
             } else {
-                // MODO TÉCNICO: Si es un bloque múltiple (fin de semana o feriado extendido)
                 let currentItem = availableDates[currentIndex];
                 document.getElementById('lblRangoFechas').innerText = currentItem ? `${currentItem.dayNum} ${currentItem.monthName}` : "FECHA";
                 document.getElementById('lblSubSemana').innerText = daysArr.length > 1 ? `Bloque fin de semana / Guardia` : `Modo técnico (Día actual)`;
 
                 if (daysArr.length > 1) {
-                    // Filtrar supervisores que tengan turno de Guardia ("G") en este bloque
-                    let activeSupervisors = supervisorsList.filter(sup => {
-                        return daysArr.some(dateStr => {
+                    // Agrupar qué días trabaja cada supervisor en este bloque
+                    let supervisorSchedules = {};
+
+                    supervisorsList.forEach(sup => {
+                        let workingDaysText = [];
+                        daysArr.forEach(dateStr => {
                             let dayData = rawSchedule[dateStr] || {};
-                            return dayData[sup.key] === "G";
+                            let val = dayData[sup.key] || "";
+                            if (val === "G" || val === "AM" || val === "PM") {
+                                let fObj = availableDates.find(d => d.dateStr === dateStr);
+                                if (fObj) {
+                                    workingDaysText.push(`${fObj.dayName} ${fObj.dayNum} ${fObj.monthName}`);
+                                }
+                            }
                         });
+
+                        if (workingDaysText.length > 0) {
+                            supervisorSchedules[sup.key] = {
+                                supervisor: sup,
+                                daysText: workingDaysText.join(" y ")
+                            };
+                        }
                     });
 
-                    // Si por alguna razón no detecta "G", toma los que tengan AM/PM en el bloque
-                    if (activeSupervisors.length === 0) {
-                        activeSupervisors = supervisorsList.filter(sup => {
-                            return daysArr.some(dateStr => {
-                                let dayData = rawSchedule[dateStr] || {};
-                                let val = dayData[sup.key] || "";
-                                return val === "AM" || val === "PM";
-                            });
-                        });
-                    }
-
-                    if (activeSupervisors.length === 0) activeSupervisors = [supervisorsList[0]];
-
                     let plaquesHtml = '';
-                    activeSupervisors.forEach(sup => {
+                    Object.values(supervisorSchedules).forEach(item => {
+                        let sup = item.supervisor;
                         plaquesHtml += `
                             <div class="guard-plaque-card">
-                                <div class="plaque-header">SUPERVISOR DE GUARDIA / OPERACIÓN</div>
+                                <div class="plaque-day-badge">${item.daysText}</div>
                                 <div class="plaque-name">${sup.name}</div>
                                 <div class="plaque-sector">SECTOR: EVENTOS + REDES</div>
-                                <div class="plaque-phone-box">Cel: +${sup.phone}</div>
+                                <div class="plaque-info-box">
+                                    <span>Celular:</span> ${sup.cleanPhone}<br>
+                                    <span>Correo:</span> ${sup.email}
+                                </div>
                                 <div class="plaque-actions">
                                     <a href="https://wa.me/${sup.phone}" target="_blank" class="plaque-btn">
                                         <svg viewBox="0 0 24 24" fill="#25D366"><path d="M17.472 14.382c-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.096 3.2 5.077 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.84 9.84 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.41 0 0 5.41 0 12.053c0 2.11.553 4.162 1.604 5.971L0 24l6.143-1.605a11.83 11.83 0 005.905 1.585h.005c6.64 0 12.05-5.41 12.05-12.05a11.9 11.9 0 00-3.488-8.413z"/></svg>
@@ -770,7 +780,6 @@
                     container.innerHTML = plaquesHtml;
 
                 } else {
-                    // Modo técnico normal de 1 día (Lunes a Viernes)
                     let colWidths = `115px repeat(1, 1fr)`;
                     let html = `<div class="unified-card">
                         <div class="days-header-grid" id="headerGridDays" style="grid-template-columns: ${colWidths};">
