@@ -378,7 +378,6 @@
     </div>
 
     <script>
-        // Enlace CSV generado de tu Google Sheet publicado
         const PUB_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQZmObQ2qBz4Gv20y8QNI-4i3EckM4eun9ASB3LCtULdSIsNdKNivdc8q6NHbsdR7wgOSFVpJEdoCIL/pub?output=csv&gid=1006208214";
 
         const supervisorsList = [
@@ -389,8 +388,8 @@
         ];
 
         let rawSchedule = {};
-        let dateColumns = [];
-        let baseDate = new Date();
+        let availableDates = []; // Lista de objetos {dateStr: '2026-10-26', label: '26-oct'}
+        let baseDate = new Date(); // Apuntará a la fecha actual o la primera disponible
         let isUnlocked = false;
 
         async function loadSheetData() {
@@ -398,11 +397,21 @@
                 const response = await fetch(PUB_CSV_URL);
                 const text = await response.text();
                 parseCSV(text);
+                
+                // Si hoy no está en el sheet, usar la primera fecha disponible
+                if (availableDates.length > 0) {
+                    let todayKey = formatDateKey(new Date());
+                    let found = availableDates.find(d => d.dateStr === todayKey);
+                    if (!found) {
+                        baseDate = parseDateKey(availableDates[0].dateStr);
+                    }
+                }
+                
                 renderApp();
             } catch (error) {
                 console.error("Error al cargar Google Sheet:", error);
                 document.getElementById('rowsSupervisorsContainer').innerHTML = 
-                    `<div style="text-align:center; padding:15px; color:#f87171; font-size:11px;">Error al conectar con Google Sheets.<br>Verifique conexión o publicación web.</div>`;
+                    `<div style="text-align:center; padding:15px; color:#f87171; font-size:11px;">Error al conectar con Google Sheets.</div>`;
             }
         }
 
@@ -411,18 +420,20 @@
             if (lines.length < 2) return;
 
             const headers = parseCSVLine(lines[0]);
-            dateColumns = [];
+            availableDates = [];
 
+            // Detectar columnas de fechas (desde la columna C en adelante, índice 2)
             for (let c = 2; c < headers.length; c++) {
                 let h = headers[c].trim().replace(/^["']|["']$/g, '');
                 if (h) {
-                    let parsedDate = normalizeDate(h);
-                    if (parsedDate) {
-                        dateColumns.push({ colIndex: c, dateStr: parsedDate });
+                    let normalized = parseSpanishDate(h);
+                    if (normalized) {
+                        availableDates.push({ colIndex: c, dateStr: normalized, label: h });
                     }
                 }
             }
 
+            // Procesar filas de supervisores
             for (let r = 1; r < lines.length; r++) {
                 let row = parseCSVLine(lines[r]);
                 if (row.length < 2) continue;
@@ -435,7 +446,7 @@
                 else if (supNameRaw.includes("SALDIVIA")) supKey = "SALDIVIA";
 
                 if (supKey) {
-                    dateColumns.forEach(item => {
+                    availableDates.forEach(item => {
                         let val = row[item.colIndex] ? row[item.colIndex].trim().replace(/["']/g, '') : "";
                         if (!rawSchedule[item.dateStr]) {
                             rawSchedule[item.dateStr] = {};
@@ -465,27 +476,27 @@
             return result;
         }
 
-        function normalizeDate(str) {
-            try {
-                if (str.includes('-')) {
-                    let parts = str.split(' ')[0].split('-');
-                    if (parts.length === 3) {
-                        if (parts[0].length === 4) return str.split(' ')[0];
-                        if (parts[2].length === 4) return `${parts[2]}-${parts[1].padStart(2,'0')}-${parts[0].padStart(2,'0')}`;
-                    }
-                } else if (str.includes('/')) {
-                    let parts = str.split(' ')[0].split('/');
-                    if (parts.length === 3) {
-                        let yr = parts[2].length === 2 ? '20' + parts[2] : parts[2];
-                        return `${yr}-${parts[1].padStart(2,'0')}-${parts[0].padStart(2,'0')}`;
-                    }
+        // Convierte formatos como "26-oct" o "15-ago" al año actual (2026) -> "2026-10-26"
+        function parseSpanishDate(str) {
+            str = str.toLowerCase().trim();
+            const months = { 'ene': '01', 'feb': '02', 'mar': '03', 'abr': '04', 'may': '05', 'jun': '06', 'jul': '07', 'ago': '08', 'sep': '09', 'oct': '10', 'nov': '11', 'dic': '12' };
+            
+            let parts = str.split(/[-/]/);
+            if (parts.length >= 2) {
+                let day = parts[0].padStart(2, '0');
+                let monthKey = parts[1].substring(0, 3);
+                let month = months[monthKey];
+                let year = parts[2] ? (parts[2].length === 2 ? '20' + parts[2] : parts[2]) : '2026';
+                if (month) {
+                    return `${year}-${month}-${day}`;
                 }
-                let d = new Date(str);
-                if (!isNaN(d.getTime())) {
-                    return d.toISOString().split('T')[0];
-                }
-            } catch(e) {}
+            }
             return null;
+        }
+
+        function parseDateKey(str) {
+            let p = str.split('-');
+            return new Date(p[0], p[1] - 1, p[2]);
         }
 
         function formatDateKey(d) {
@@ -539,31 +550,29 @@
                 for (let i = 0; i < 7; i++) {
                     let nextDay = new Date(monday);
                     nextDay.setDate(monday.getDate() + i);
-                    daysArr.push(nextDay);
+                    daysArr.push(formatDateKey(nextDay));
                 }
 
-                let dIni = daysArr[0];
-                let dFin = daysArr[6];
-                document.getElementById('lblRangoFechas').innerText = `Semana: ${dIni.getDate()}/${dIni.getMonth()+1} al ${dFin.getDate()}/${dFin.getMonth()+1}`;
-                document.getElementById('lblSubSemana').innerText = `Modo Auditoría Activo`;
+                document.getElementById('lblRangoFechas').innerText = `Modo Auditoría Semanal`;
+                document.getElementById('lblSubSemana').innerText = `Semana activa`;
             } else {
                 let dayOfWeek = baseDate.getDay();
                 let isWeekend = (dayOfWeek === 0 || dayOfWeek === 6);
+                let todayKey = formatDateKey(baseDate);
 
                 if (isWeekend) {
                     let dSab = new Date(baseDate);
                     if (dayOfWeek === 0) dSab.setDate(baseDate.getDate() - 1);
                     let dDom = new Date(dSab);
                     dDom.setDate(dSab.getDate() + 1);
-                    daysArr = [dSab, dDom];
+                    daysArr = [formatDateKey(dSab), formatDateKey(dDom)];
                 } else {
-                    daysArr = [new Date(baseDate)];
+                    daysArr = [todayKey];
                 }
 
-                let dHoy = daysArr[0];
                 document.getElementById('lblRangoFechas').innerText = daysArr.length === 2 ? 
-                    `Fin de Semana: ${dHoy.getDate()} y ${daysArr[1].getDate()}` : 
-                    dHoy.toLocaleDateString('es', {weekday: 'long', day: 'numeric', month: 'short'});
+                    `Fin de Semana` : 
+                    baseDate.toLocaleDateString('es', {weekday: 'long', day: 'numeric', month: 'short'});
                 document.getElementById('lblSubSemana').innerText = `Turnos actuales`;
             }
 
@@ -571,10 +580,10 @@
             document.getElementById('headerGridDays').style.gridTemplateColumns = colWidths;
 
             let headerHtml = `<div class="col-sup">Sup</div>`;
-            daysArr.forEach((d) => {
-                let daysNames = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
-                let name = daysNames[d.getDay()];
-                headerHtml += `<div>${name}<br><span style="font-size:9px; opacity:0.7">${d.getDate()}/${d.getMonth()+1}</span></div>`;
+            daysArr.forEach((dateStr) => {
+                let foundObj = availableDates.find(d => d.dateStr === dateStr);
+                let label = foundObj ? foundObj.label : dateStr;
+                headerHtml += `<div><span style="font-size:10px; font-weight:bold">${label}</span></div>`;
             });
             document.getElementById('headerGridDays').innerHTML = headerHtml;
 
@@ -595,11 +604,10 @@
                         </div>
                 `;
 
-                daysArr.forEach(d => {
-                    let dateKey = formatDateKey(d);
-                    let dayData = rawSchedule[dateKey] || {};
+                daysArr.forEach(dateStr => {
+                    let dayData = rawSchedule[dateStr] || {};
                     let val = dayData[sup.key] || "";
-                    let isWkndCell = d.getDay() === 0 || d.getDay() === 6;
+                    let isWknd = false; // ya manejado por formato
 
                     let badgeClass = "badge-empty";
                     let displayText = "-";
@@ -610,7 +618,7 @@
                     } else if (val === "PM") {
                         badgeClass = "badge-pm";
                         displayText = "PM";
-                    } else if (val === "G" || (isWkndCell && val === "G")) {
+                    } else if (val === "G") {
                         badgeClass = "badge-guardia";
                         displayText = "G";
                     } else if (val === "FC") {
@@ -632,24 +640,21 @@
 
         function renderExcelTable() {
             const table = document.getElementById('excelTable');
-            let dates = Object.keys(rawSchedule).sort();
-            
-            if (dates.length === 0) {
-                table.innerHTML = "<tr><td>Cargando datos de la planilla...</td></tr>";
+            if (availableDates.length === 0) {
+                table.innerHTML = "<tr><td>Cargando datos...</td></tr>";
                 return;
             }
 
             let html = `<thead><tr><th>Supervisor</th>`;
-            dates.forEach(dt => {
-                let parts = dt.split('-');
-                html += `<th>${parts[2]}/${parts[1]}</th>`;
+            availableDates.forEach(item => {
+                html += `<th>${item.label}</th>`;
             });
             html += `</tr></thead><tbody>`;
 
             supervisorsList.forEach(sup => {
                 html += `<tr><td style="font-weight:bold">${sup.name}</td>`;
-                dates.forEach(dt => {
-                    let val = rawSchedule[dt] && rawSchedule[dt][sup.key] ? rawSchedule[dt][sup.key] : "";
+                availableDates.forEach(item => {
+                    let val = rawSchedule[item.dateStr] && rawSchedule[item.dateStr][sup.key] ? rawSchedule[item.dateStr][sup.key] : "";
                     let bg = "";
                     if(val === "AM") bg = "color:#38bdf8";
                     else if(val === "PM") bg = "color:#fbbf24";
