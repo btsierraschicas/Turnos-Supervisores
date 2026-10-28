@@ -190,6 +190,7 @@
             font-size: 21px;
             font-weight: 900;
             color: #fff;
+            margin-top: 8px;
             margin-bottom: 8px;
             text-transform: uppercase;
             letter-spacing: 0.5px;
@@ -200,7 +201,7 @@
             display: flex;
             justify-content: center;
             gap: 8px;
-            margin-bottom: 10px;
+            margin-bottom: 8px;
         }
 
         .plaque-day-box {
@@ -229,20 +230,20 @@
             text-transform: uppercase;
         }
 
-        /* Insignia AM + PM con el mismo ancho exacto que el contenedor de los días */
+        /* Insignia AM + PM con el mismo ancho exacto que el contenedor de los días, ubicada entre los días y el nombre */
         .plaque-shift-badge-inline {
             background: var(--corp-badge-bg);
             color: var(--corp-badge-text);
             border: 1px solid rgba(0, 163, 224, 0.5);
-            font-size: 12px;
+            font-size: 11px;
             font-weight: 900;
-            padding: 6px;
-            border-radius: 8px;
-            margin: 0 auto 10px auto;
+            padding: 5px;
+            border-radius: 6px;
+            margin: 0 auto 8px auto;
             letter-spacing: 1px;
             text-transform: uppercase;
             width: 100%;
-            max-width: calc(100% - 16px);
+            max-width: 228px; /* Ancho exacto calculado acorde a las cajitas de días */
         }
 
         .plaque-sector {
@@ -826,10 +827,10 @@
 
                         plaquesHtml += `
                             <div class="guard-plaque-card">
-                                <div class="plaque-shift-badge-inline">AM + PM</div>
                                 <div class="plaque-days-container">
                                     ${daysBoxesHtml}
                                 </div>
+                                <div class="plaque-shift-badge-inline">AM + PM</div>
                                 <div class="plaque-name">${sup.name}</div>
                                 <div class="plaque-sector">SECTOR: <strong>EVENTOS + REDES</strong></div>
                                 <div class="plaque-info-box">
