@@ -482,13 +482,23 @@
         let currentIndex = 0; 
         let baseWeekDate = new Date(); 
         let isAuthorized = false; 
-        let isSupervisorMode = false; // Por defecto abre en Modo Supervisor tras la clave
+        let isSupervisorMode = false; 
         let pClickCount = 0;
 
         async function loadSheetData() {
+            // Mostrar mensaje de carga en vivo con retardo mínimo de 3 segundos
+            document.getElementById('appContainer').innerHTML = `
+                <div style="text-align:center; padding:40px 20px; color:var(--accent-blue);">
+                    <div style="font-size:14px; font-weight:800; margin-bottom:8px; text-transform:uppercase; letter-spacing:0.5px;">Tomando datos en vivo</div>
+                    <div style="font-size:11px; color:var(--text-muted);">Aguarde por favor...</div>
+                </div>
+            `;
+
+            let fetchPromise = fetch(API_URL, { redirect: "follow" }).then(res => res.json());
+            let timerPromise = new Promise(resolve => setTimeout(resolve, 3000));
+
             try {
-                const response = await fetch(API_URL, { redirect: "follow" });
-                const rows = await response.json();
+                const [rows] = await Promise.all([fetchPromise, timerPromise]);
                 parseSheetRows(rows);
                 
                 if (availableDates.length > 0) {
@@ -598,7 +608,7 @@
                 let pin = prompt("INGRESE CONTRASEÑA DE MODO SUPERVISOR:");
                 if (pin === "1234") {
                     isAuthorized = true;
-                    isSupervisorMode = true; // Al entrar, arranca en Modo Supervisor
+                    isSupervisorMode = true; // Por defecto arranca en Modo Supervisor
                     alert("¡BIENVENIDO!");
                     document.getElementById('modeToggleBar').classList.add('active');
                     renderApp();
@@ -612,12 +622,6 @@
 
         function toggleViewMode() {
             isSupervisorMode = !isSupervisorMode;
-            let btn = document.getElementById('toggleModeBtn');
-            if (isSupervisorMode) {
-                btn.innerText = "Cambiar a Modo Técnico";
-            } else {
-                btn.innerText = "Cambiar a Modo Supervisor";
-            }
             renderApp();
         }
 
@@ -718,7 +722,7 @@
             const navBar = document.getElementById('dateNavigator');
             let toggleBtn = document.getElementById('toggleModeBtn');
 
-            // Actualizar el texto del botón de alternancia según el modo actual
+            // Actualizar el texto del botón de alternancia
             if (isSupervisorMode) {
                 toggleBtn.innerText = "Cambiar a Modo Técnico";
             } else {
