@@ -196,7 +196,6 @@
             letter-spacing: 0.5px;
         }
 
-        /* Contenedor de recuadros de días uno al lado del otro */
         .plaque-days-container {
             display: flex;
             justify-content: center;
@@ -230,7 +229,6 @@
             text-transform: uppercase;
         }
 
-        /* Insignia AM + PM con el mismo ancho exacto que el contenedor de los días, ubicada entre los días y el nombre */
         .plaque-shift-badge-inline {
             background: var(--corp-badge-bg);
             color: var(--corp-badge-text);
@@ -243,7 +241,7 @@
             letter-spacing: 1px;
             text-transform: uppercase;
             width: 100%;
-            max-width: 228px; /* Ancho exacto calculado acorde a las cajitas de días */
+            max-width: 228px;
         }
 
         .plaque-sector {
@@ -312,7 +310,7 @@
             height: 15px;
         }
 
-        /* Cuadro unificado normal (Modo Supervisor) */
+        /* Cuadro unificado normal */
         .unified-card {
             background: var(--card-bg);
             border: 1px solid var(--card-border);
@@ -453,8 +451,8 @@
             <button class="toggle-btn" id="toggleModeBtn" onclick="toggleViewMode()">Cambiar a Modo Supervisor</button>
         </div>
 
-        <!-- SELECTOR DE DÍAS -->
-        <div id="dateNavigator" class="date-navigator">
+        <!-- SELECTOR DE DÍAS (Visible solo en Modo Supervisor) -->
+        <div id="dateNavigator" class="date-navigator" style="display: none;">
             <button class="nav-arrow" onclick="navigate(-1)">&#10094;</button>
             <div class="current-date-display">
                 <div class="main-label" id="lblRangoFechas">Fecha</div>
@@ -717,15 +715,17 @@
 
             let daysArr = getDaysToDisplay();
             const container = document.getElementById('appContainer');
+            const navBar = document.getElementById('dateNavigator');
 
             if (isSupervisorMode) {
+                navBar.style.display = "flex";
                 document.getElementById('lblRangoFechas').innerText = `MODO SUPERVISOR (SEMANA)`;
                 document.getElementById('lblSubSemana').innerText = `Auditoría activa`;
                 
                 let colWidths = `115px ` + `repeat(${daysArr.length}, 1fr)`;
                 let html = `<div class="unified-card">
                     <div class="days-header-grid" id="headerGridDays" style="grid-template-columns: ${colWidths};">
-                        <div class="col-sup">SUP</div>`;
+                        <div class="col-sup">SUPERVISOR</div>`;
                 
                 daysArr.forEach((dateStr) => {
                     let foundObj = availableDates.find(d => d.dateStr === dateStr);
@@ -778,11 +778,13 @@
                 container.innerHTML = html;
 
             } else {
-                let currentItem = availableDates[currentIndex];
-                document.getElementById('lblRangoFechas').innerText = currentItem ? `${currentItem.dayNum} ${currentItem.monthName}` : "FECHA";
-                document.getElementById('lblSubSemana').innerText = daysArr.length > 1 ? `Bloque fin de semana / Guardia` : `Modo técnico (Día actual)`;
-
+                // MODO TÉCNICO: Si es un bloque múltiple (fin de semana o guardia) muestra las placas. Si es de 1 día, oculta el navegador.
                 if (daysArr.length > 1) {
+                    navBar.style.display = "flex"; // Muestra el navegador si es bloque especial
+                    let currentItem = availableDates[currentIndex];
+                    document.getElementById('lblRangoFechas').innerText = currentItem ? `${currentItem.dayNum} ${currentItem.monthName}` : "FECHA";
+                    document.getElementById('lblSubSemana').innerText = `Bloque fin de semana / Guardia`;
+
                     let supervisorSchedules = {};
 
                     supervisorsList.forEach(sup => {
@@ -856,6 +858,8 @@
                     container.innerHTML = plaquesHtml;
 
                 } else {
+                    navBar.style.display = "none"; // Oculta por completo el deslizador en días de semana normales
+
                     let activeTechSupervisors = supervisorsList.filter(sup => {
                         let dayData = rawSchedule[daysArr[0]] || {};
                         let val = dayData[sup.key] || "";
@@ -864,19 +868,17 @@
 
                     if (activeTechSupervisors.length === 0) activeTechSupervisors = supervisorsList;
 
+                    let foundObj = availableDates.find(d => d.dateStr === daysArr[0]);
+                    let dayNameText = foundObj ? foundObj.dayName : "";
+                    let dayNumText = foundObj ? foundObj.dayNum : "";
+                    let monthText = foundObj ? foundObj.monthName : "";
+
                     let colWidths = `115px repeat(1, 1fr)`;
                     let html = `<div class="unified-card">
                         <div class="days-header-grid" id="headerGridDays" style="grid-template-columns: ${colWidths};">
-                            <div class="col-sup">SUP</div>`;
+                            <div class="col-sup">SUPERVISOR</div>`;
                     
-                    daysArr.forEach((dateStr) => {
-                        let foundObj = availableDates.find(d => d.dateStr === dateStr);
-                        if (foundObj) {
-                            html += `<div><span style="font-size:8px; color:var(--text-muted); display:block;">${foundObj.monthName}</span><span style="font-size:11px; font-weight:800;">${foundObj.dayNum}</span></div>`;
-                        } else {
-                            html += `<div><span>${dateStr}</span></div>`;
-                        }
-                    });
+                    html += `<div><span style="font-size:8px; color:var(--text-muted); display:block;">${dayNameText}</span><span style="font-size:11px; font-weight:800;">${dayNumText} ${monthText}</span></div>`;
                     html += `</div><div id="rowsSupervisorsContainer">`;
 
                     activeTechSupervisors.forEach(sup => {
@@ -898,19 +900,16 @@
                                     </div>
                                 </div>`;
 
-                        daysArr.forEach(dateStr => {
-                            let dayData = rawSchedule[dateStr] || {};
-                            let val = dayData[sup.key] || "";
-                            let badgeClass = "badge-empty";
-                            let displayText = "-";
+                        let dayData = rawSchedule[daysArr[0]] || {};
+                        let val = dayData[sup.key] || "";
+                        let badgeClass = "badge-empty";
+                        let displayText = "-";
 
-                            if (val === "AM") { badgeClass = "badge-am"; displayText = "AM"; }
-                            else if (val === "PM") { badgeClass = "badge-pm"; displayText = "PM"; }
-                            else if (val === "G") { badgeClass = "badge-guardia"; displayText = "AM<br>PM"; }
+                        if (val === "AM") { badgeClass = "badge-am"; displayText = "AM"; }
+                        else if (val === "PM") { badgeClass = "badge-pm"; displayText = "PM"; }
+                        else if (val === "G") { badgeClass = "badge-guardia"; displayText = "AM<br>PM"; }
 
-                            html += `<div class="shift-cell ${badgeClass}">${displayText}</div>`;
-                        });
-
+                        html += `<div class="shift-cell ${badgeClass}">${displayText}</div>`;
                         html += `</div>`;
                     });
 
