@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Guardia Supervisores - Sierras Chicas</title>
     
-    <!-- ICONO PARA ACCESOS DIRECTOS EN DISPOSITIVOS MÓVILES Y PANTALLA DE INICIO -->
+    <!-- ICONO PARA ACCESOS DIRECTOS EN DISPOSITIVOS MÓVILES -->
     <link rel="icon" type="image/png" href="icon.png">
     <link rel="apple-touch-icon" href="icon.png">
     <meta name="theme-color" content="#070d19">
@@ -565,18 +565,23 @@
                 renderApp();
             } catch (error) {
                 console.error("Error al procesar datos:", error);
-                document.getElementById('appContainer').innerHTML = 
-                    `<div style="text-align:center; padding:15px; color:#f87171; font-size:11px;">Error al procesar datos del Google Sheet.</div>`;
+                document.getElementById('appContainer').innerHTML = `
+                    <div style="text-align:center; padding:20px; color:#f87171; font-size:11px;">
+                        Error al procesar datos del Google Sheet.<br>Verifique la conexión o el formato de las columnas.
+                    </div>
+                `;
             }
         }
 
         function parseSheetRows(rows) {
-            if (!rows || rows.length < 2) return;
+            if (!rows || !Array.isArray(rows) || rows.length < 2) return;
             const headers = rows[0];
             availableDates = [];
+            rawSchedule = {};
+            adminSchedule = {};
 
             for (let c = 2; c < headers.length; c++) {
-                let h = String(headers[c]).trim();
+                let h = headers[c] !== undefined ? String(headers[c]).trim() : "";
                 if (h) {
                     let normalized = parseAnyDate(h);
                     if (normalized) {
@@ -588,7 +593,7 @@
 
             for (let r = 1; r < rows.length; r++) {
                 let row = rows[r];
-                if (!row || row.length < 2) continue;
+                if (!row || !Array.isArray(row) || row.length < 2) continue;
                 let rowNameRaw = row[1] ? String(row[1]).trim().toUpperCase() : "";
 
                 if (rowNameRaw.includes("ESCALANTE") || rowNameRaw.includes("DARIO")) {
@@ -626,7 +631,8 @@
         }
 
         function parseAnyDate(str) {
-            str = str.trim();
+            if (!str) return null;
+            str = String(str).trim();
             if (str.includes('T') || str.includes('Z')) {
                 return str.split('T')[0];
             }
@@ -635,14 +641,14 @@
                 return `${parts[0]}-${parts[1].padStart(2,'0')}-${parts[2].padStart(2,'0')}`;
             }
             let lower = str.toLowerCase();
-            const months = { 'ene': '01', 'feb': '02', 'mar': '03', 'abr': '04', 'may': '05', 'jun': '06', 'jul': '07', 'ago': '08', 'sep': '09', 'oct': '10', 'nov': '11', 'dic': '12' };
-            let parts = lower.split(/[-/]/);
+            const months = { 'ene': '01', 'feb': '02', 'mar': '03', 'abr': '04', 'may': '05', 'jun': '06', 'jul': '07', 'ago': '08', 'sep': '09', 'oct': '10', 'nov': '11', 'dic': '12', 'jan': '01', 'apr': '04', 'aug': '08', 'dec': '12' };
+            let parts = lower.split(/[-/ ]/);
             if (parts.length >= 2) {
                 let day = parts[0].padStart(2, '0');
                 let mKey = parts[1].substring(0, 3);
                 let month = months[mKey];
                 let year = parts[2] ? (parts[2].length === 2 ? '20' + parts[2] : parts[2]) : '2026';
-                if (month) return `${year}-${month}-${day}`;
+                if (month && !isNaN(day)) return `${year}-${month}-${day}`;
             }
             let d = new Date(str);
             if (!isNaN(d.getTime())) {
@@ -772,7 +778,14 @@
         }
 
         function renderApp() {
-            if (availableDates.length === 0) return;
+            if (availableDates.length === 0) {
+                document.getElementById('appContainer').innerHTML = `
+                    <div style="text-align:center; padding:30px; color:#f87171; font-size:12px;">
+                        No se pudieron cargar o reconocer las fechas desde el Google Sheet. Verifique las columnas de la planilla.
+                    </div>
+                `;
+                return;
+            }
 
             let daysArr = getDaysToDisplay();
             const container = document.getElementById('appContainer');
