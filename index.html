@@ -794,16 +794,41 @@
                 topModeBtn.innerText = "SUP";
                 topModeBtn.title = "Cambiar a Modo Supervisor";
                 
-                // Lógica de navegación sin clave:
-                // Si estamos en el índice inicial (o día actual), ocultamos la flecha izquierda y mostramos la derecha para avanzar.
-                // Si ya nos movimos hacia adelante (currentIndex > 0 o estamos viendo el fin de semana), mostramos ambas para poder volver.
+                // Lógica exacta solicitada para modo público (sin clave):
+                // 1. Verificamos si hoy es viernes (día 5) y no tiene guardia 'G'.
+                // 2. Si es viernes y estamos en el día actual (currentIndex inicial para hoy), mostramos la flecha derecha (>) para ver el finde, y ocultamos la izquierda.
+                // 3. Si ya avanzamos al fin de semana, ocultamos la derecha y mostramos la izquierda (<) para volver al viernes.
+                // 4. Si no es viernes, ambas flechas quedan ocultas.
                 if (!isAuthorized) {
-                    if (currentIndex === 0) {
+                    let currentItem = availableDates[currentIndex];
+                    let isFriday = false;
+                    if (currentItem) {
+                        let p = currentItem.dateStr.split('-');
+                        let dObj = new Date(p[0], p[1] - 1, p[2]);
+                        let dayOfWeek = dObj.getDay(); // 5 es viernes
+                        let todayData = rawSchedule[currentItem.dateStr] || {};
+                        let hasG = Object.values(todayData).includes("G");
+                        if (dayOfWeek === 5 && !hasG) {
+                            isFriday = true;
+                        }
+                    }
+
+                    // Comprobamos si estamos visualizando el día viernes o ya avanzamos al bloque de finde
+                    let todayKey = formatDateKey(new Date());
+                    let isViewingToday = currentItem && currentItem.dateStr === todayKey;
+
+                    if (isFriday && isViewingToday) {
+                        // Estamos en viernes: permitimos avanzar al finde con la flecha derecha
                         if (leftBtn) leftBtn.style.display = "none";
                         if (rightBtn) rightBtn.style.display = "flex";
-                    } else {
+                    } else if (isFriday && !isViewingToday) {
+                        // Ya avanzamos al finde desde el viernes: permitimos volver atrás con la flecha izquierda
                         if (leftBtn) leftBtn.style.display = "flex";
-                        if (rightBtn) rightBtn.style.display = "flex";
+                        if (rightBtn) rightBtn.style.display = "none";
+                    } else {
+                        // Cualquier otro día de la semana: sin flechas
+                        if (leftBtn) leftBtn.style.display = "none";
+                        if (rightBtn) rightBtn.style.display = "none";
                     }
                 } else {
                     if (leftBtn) leftBtn.style.display = "flex";
