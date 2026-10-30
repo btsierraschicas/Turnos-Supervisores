@@ -4,6 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Guardia Supervisores - Sierras Chicas</title>
+    
+    <!-- ICONO PARA ACCESOS DIRECTOS EN DISPOSITIVOS MÓVILES -->
+    <link rel="icon" type="image/png" href="icon.png">
+    <link rel="apple-touch-icon" href="icon.png">
+    <meta name="theme-color" content="#070d19">
+
     <style>
         :root {
             --bg-color: #070d19;
@@ -114,20 +120,31 @@
             display: inline-block;
         }
 
-        /* Spinner de carga animado */
-        .spinner {
-            width: 32px;
-            height: 32px;
-            border: 3px solid rgba(0, 163, 224, 0.2);
-            border-top: 3px solid var(--accent-blue);
-            border-radius: 50%;
-            animation: spin 0.8s linear infinite;
-            margin: 0 auto 12px auto;
+        /* Animación de latido (heartbeat) para el icon.png en la carga */
+        .loading-logo-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 14px;
         }
 
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+        .loading-logo {
+            width: 65px;
+            height: 65px;
+            border-radius: 14px;
+            object-fit: cover;
+            box-shadow: 0 0 20px rgba(0, 163, 224, 0.4);
+            border: 2px solid var(--accent-blue);
+            animation: heartbeat 1.2s ease-in-out infinite;
+        }
+
+        @keyframes heartbeat {
+            0% { transform: scale(1); }
+            15% { transform: scale(1.12); }
+            30% { transform: scale(1); }
+            45% { transform: scale(1.08); }
+            60% { transform: scale(1); }
+            100% { transform: scale(1); }
         }
 
         /* Selector de días */
@@ -181,7 +198,7 @@
             margin-top: 1px;
         }
 
-        /* Tarjeta imponente estilo Placa Informativa para Guardia */
+        /* Placas */
         .guard-plaque-card {
             background: var(--corp-plaque-bg);
             border: 2px solid var(--corp-plaque-border);
@@ -254,21 +271,7 @@
             text-transform: uppercase;
         }
 
-        .plaque-shift-badge-inline {
-            background: var(--corp-badge-bg);
-            color: var(--corp-badge-text);
-            border: 1px solid rgba(0, 163, 224, 0.5);
-            font-size: 11px;
-            font-weight: 900;
-            padding: 5px;
-            border-radius: 6px;
-            margin: 0 auto 8px auto;
-            letter-spacing: 1px;
-            text-transform: uppercase;
-            width: 100%;
-        }
-
-        .admin-time-badge-inline {
+        .plaque-shift-badge-inline, .admin-time-badge-inline {
             background: var(--corp-badge-bg);
             color: var(--corp-badge-text);
             border: 1px solid rgba(0, 163, 224, 0.5);
@@ -486,13 +489,13 @@
         </header>
 
         <!-- SELECTOR DE DÍAS -->
-        <div id="dateNavigator" class="date-navigator" style="display: none;">
-            <button class="nav-arrow" onclick="navigate(-1)">&#10094;</button>
+        <div id="dateNavigator" class="date-navigator">
+            <button id="navLeftBtn" class="nav-arrow" onclick="navigate(-1)">&#10094;</button>
             <div class="current-date-display">
                 <div class="main-label" id="lblRangoFechas">Fecha</div>
                 <div class="sub-label" id="lblSubSemana">Modo técnico</div>
             </div>
-            <button class="nav-arrow" onclick="navigate(1)">&#10095;</button>
+            <button id="navRightBtn" class="nav-arrow" onclick="navigate(1)">&#10095;</button>
         </div>
 
         <!-- CONTENEDOR DINÁMICO -->
@@ -530,17 +533,18 @@
         let pClickCount = 0;
 
         async function loadSheetData() {
-            document.getElementById('dateNavigator').style.display = "none";
             document.getElementById('appContainer').innerHTML = `
                 <div style="text-align:center; padding:50px 20px; color:var(--accent-blue);">
-                    <div class="spinner"></div>
+                    <div class="loading-logo-container">
+                        <img src="icon.png" class="loading-logo" alt="Cargando...">
+                    </div>
                     <div style="font-size:14px; font-weight:800; margin-bottom:6px; text-transform:uppercase; letter-spacing:0.5px;">Tomando datos en vivo</div>
                     <div style="font-size:11px; color:var(--text-muted);">Aguarde por favor...</div>
                 </div>
             `;
 
             let fetchPromise = fetch(API_URL, { redirect: "follow" }).then(res => res.json());
-            let timerPromise = new Promise(resolve => setTimeout(resolve, 2000)); // Reducido a 2 segundos exactos
+            let timerPromise = new Promise(resolve => setTimeout(resolve, 2000));
 
             try {
                 const [rows] = await Promise.all([fetchPromise, timerPromise]);
@@ -770,19 +774,28 @@
 
             let daysArr = getDaysToDisplay();
             const container = document.getElementById('appContainer');
-            const navBar = document.getElementById('dateNavigator');
             let topModeBtn = document.getElementById('topModeBtn');
+            let leftBtn = document.getElementById('navLeftBtn');
+            let rightBtn = document.getElementById('navRightBtn');
 
             if (isSupervisorMode) {
                 topModeBtn.innerText = "TEC";
                 topModeBtn.title = "Cambiar a Modo Técnico";
+                leftBtn.style.display = "flex";
+                rightBtn.style.display = "flex";
             } else {
                 topModeBtn.innerText = "SUP";
                 topModeBtn.title = "Cambiar a Modo Supervisor";
+                if (!isAuthorized) {
+                    leftBtn.style.display = "none";
+                    rightBtn.style.display = "none";
+                } else {
+                    leftBtn.style.display = "flex";
+                    rightBtn.style.display = "flex";
+                }
             }
 
             if (isSupervisorMode) {
-                navBar.style.display = "flex";
                 document.getElementById('lblRangoFechas').innerText = `MODO SUPERVISOR (SEMANA)`;
                 document.getElementById('lblSubSemana').innerText = `Auditoría activa`;
                 
@@ -833,14 +846,9 @@
             } else {
                 // MODO TÉCNICO
                 if (daysArr.length > 1) {
-                    if (isAuthorized) {
-                        navBar.style.display = "flex";
-                        let currentItem = availableDates[currentIndex];
-                        document.getElementById('lblRangoFechas').innerText = currentItem ? `${currentItem.dayNum} ${currentItem.monthName}` : "FECHA";
-                        document.getElementById('lblSubSemana').innerText = `Bloque fin de semana / Guardia`;
-                    } else {
-                        navBar.style.display = "none";
-                    }
+                    let currentItem = availableDates[currentIndex];
+                    document.getElementById('lblRangoFechas').innerText = currentItem ? `${currentItem.dayNum} ${currentItem.monthName}` : "FECHA";
+                    document.getElementById('lblSubSemana').innerText = `Bloque fin de semana / Guardia`;
 
                     let supervisorSchedules = {};
 
@@ -903,14 +911,12 @@
                                     </a>
                                     <a href="https://wa.me/${sup.phone}" target="_blank" class="plaque-btn">
                                         <svg viewBox="0 0 24 24" fill="#25D366"><path d="M17.472 14.382c-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.096 3.2 5.077 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.84 9.84 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.41 0 0 5.41 0 12.053c0 2.11.553 4.162 1.604 5.971L0 24l6.143-1.605a11.83 11.83 0 005.905 1.585h.005c6.64 0 12.05-5.41 12.05-12.05a11.9 11.9 0 00-3.488-8.413z"/></svg>
-                                        WhatsApp
-                                    </a>
-                                    <a href="mailto:${sup.email}" class="plaque-btn">
-                                        <svg viewBox="0 0 24 24"><path fill="#0078D4" d="M12.5 2.5l9 5.2v10.6l-9 5.2-9-5.2V7.7l9-5.2z"/><path fill="#198AB3" d="M12.5 2.5v21l9-5.2V7.7l-9-5.2z"/><path fill="#005A9E" d="M12.5 13.5L3.5 8.3l9-5.2 9 5.2-9 5.2z"/><path fill="#002050" d="M3.5 8.3v9.5l9 5.2v-11.1l-9-3.6z"/><circle cx="8" cy="15" r="4.5" fill="#0078D4"/><text x="8" y="17.2" font-size="6.5" font-weight="bold" fill="#ffffff" text-anchor="middle">O</text></svg>
-                                        Correo
-                                    </a>
-                                </div>
-                            </div>`;
+                                        </a>
+                                        <a href="mailto:${sup.email}" class="plaque-btn">
+                                            <svg viewBox="0 0 24 24"><path fill="#0078D4" d="M12.5 2.5l9 5.2v10.6l-9 5.2-9-5.2V7.7l9-5.2z"/><path fill="#198AB3" d="M12.5 2.5v21l9-5.2V7.7l-9-5.2z"/><path fill="#005A9E" d="M12.5 13.5L3.5 8.3l9-5.2 9 5.2-9 5.2z"/><path fill="#002050" d="M3.5 8.3v9.5l9 5.2v-11.1l-9-3.6z"/><circle cx="8" cy="15" r="4.5" fill="#0078D4"/><text x="8" y="17.2" font-size="6.5" font-weight="bold" fill="#ffffff" text-anchor="middle">O</text></svg>
+                                        </a>
+                                    </div>
+                                </div>`;
                     });
                     container.innerHTML = plaquesHtml;
 
@@ -1106,20 +1112,17 @@
                                         </a>
                                         <a href="https://wa.me/${administrativeData.phone}" target="_blank" class="plaque-btn">
                                             <svg viewBox="0 0 24 24" fill="#25D366"><path d="M17.472 14.382c-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.096 3.2 5.077 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.84 9.84 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.41 0 0 5.41 0 12.053c0 2.11.553 4.162 1.604 5.971L0 24l6.143-1.605a11.83 11.83 0 005.905 1.585h.005c6.64 0 12.05-5.41 12.05-12.05a11.9 11.9 0 00-3.488-8.413z"/></svg>
-                                            WhatsApp
-                                        </a>
-                                        <a href="mailto:${administrativeData.email}" class="plaque-btn">
-                                            <svg viewBox="0 0 24 24"><path fill="#0078D4" d="M12.5 2.5l9 5.2v10.6l-9 5.2-9-5.2V7.7l9-5.2z"/><path fill="#198AB3" d="M12.5 2.5v21l9-5.2V7.7l-9-5.2z"/><path fill="#005A9E" d="M12.5 13.5L3.5 8.3l9-5.2 9 5.2-9 5.2z"/><path fill="#002050" d="M3.5 8.3v9.5l9 5.2v-11.1l-9-3.6z"/><circle cx="8" cy="15" r="4.5" fill="#0078D4"/><text x="8" y="17.2" font-size="6.5" font-weight="bold" fill="#ffffff" text-anchor="middle">O</text></svg>
-                                            Correo
-                                        </a>
-                                    </div>
+                                        WhatsApp
+                                    </a>
+                                    <a href="mailto:${administrativeData.email}" class="plaque-btn">
+                                        <svg viewBox="0 0 24 24"><path fill="#0078D4" d="M12.5 2.5l9 5.2v10.6l-9 5.2-9-5.2V7.7l9-5.2z"/><path fill="#198AB3" d="M12.5 2.5v21l9-5.2V7.7l-9-5.2z"/><path fill="#005A9E" d="M12.5 13.5L3.5 8.3l9-5.2 9 5.2-9 5.2z"/><path fill="#002050" d="M3.5 8.3v9.5l9 5.2v-11.1l-9-3.6z"/><circle cx="8" cy="15" r="4.5" fill="#0078D4"/><text x="8" y="17.2" font-size="6.5" font-weight="bold" fill="#ffffff" text-anchor="middle">O</text></svg>
+                                        Correo
+                                    </a>
                                 </div>
-                            `;
-                        }
-
-                        html += `</div></div>`;
-                        container.innerHTML = html;
+                            </div>
+                        `;
                     }
+
                 }
             }
         }
