@@ -4,12 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Guardia Supervisores - Sierras Chicas</title>
-    
-    <!-- ICONO PARA ACCESOS DIRECTOS Y PESTAÑA -->
-    <link rel="icon" type="image/png" href="icon.png">
-    <link rel="apple-touch-icon" href="icon.png">
-    <meta name="theme-color" content="#070d19">
-
     <style>
         :root {
             --bg-color: #070d19;
@@ -24,12 +18,6 @@
             --pm-text: #fbbf24;
             --guardia-bg: rgba(239, 68, 68, 0.2);
             --guardia-text: #f87171;
-            --corp-plaque-bg: linear-gradient(145deg, #0b2238, #0e2e4d);
-            --corp-plaque-border: rgba(0, 163, 224, 0.6);
-            --corp-badge-bg: rgba(0, 163, 224, 0.2);
-            --corp-badge-text: #38bdf8;
-            --admin-plaque-bg: linear-gradient(145deg, #10263f, #143557);
-            --admin-plaque-border: rgba(56, 189, 248, 0.4);
             --franco-bg: rgba(100, 116, 139, 0.2);
             --franco-text: #94a3b8;
         }
@@ -95,48 +83,23 @@
         }
 
         .app-title p {
-            font-size: 10px;
+            font-size: 11px;
             color: var(--text-muted);
             margin-top: 1px;
-            font-weight: 600;
-            text-transform: uppercase;
         }
 
-        /* Botón TEC / SUP integrado arriba a la derecha */
-        .top-mode-btn {
-            display: none;
-            background: linear-gradient(135deg, #00a3e0, #0077a3);
-            color: #fff;
-            border: 1px solid rgba(255,255,255,0.2);
-            padding: 6px 12px;
-            border-radius: 8px;
-            font-size: 11px;
+        .personal-logo {
+            font-size: 16px;
             font-weight: 900;
-            cursor: pointer;
-            box-shadow: 0 2px 8px rgba(0, 163, 224, 0.4);
-            letter-spacing: 0.5px;
-        }
-        .top-mode-btn.active {
-            display: inline-block;
-        }
-
-        /* Spinner de carga animado */
-        .spinner {
-            width: 32px;
-            height: 32px;
-            border: 3px solid rgba(0, 163, 224, 0.2);
-            border-top: 3px solid var(--accent-blue);
-            border-radius: 50%;
-            animation: spin 0.8s linear infinite;
-            margin: 0 auto 12px auto;
+            color: var(--accent-blue);
+            letter-spacing: -0.5px;
+            background: rgba(0, 163, 224, 0.1);
+            padding: 5px 8px;
+            border-radius: 7px;
+            border: 1px solid rgba(0, 163, 224, 0.3);
         }
 
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-        /* Selector de días */
+        /* Selector de días / semanas */
         .date-navigator {
             background: var(--card-bg);
             border: 1px solid var(--card-border);
@@ -187,174 +150,7 @@
             margin-top: 1px;
         }
 
-        /* Tarjeta imponente estilo Placa Informativa para Guardia */
-        .guard-plaque-card {
-            background: var(--corp-plaque-bg);
-            border: 2px solid var(--corp-plaque-border);
-            border-radius: 14px;
-            padding: 16px;
-            margin-bottom: 14px;
-            box-shadow: 0 8px 24px rgba(0, 163, 224, 0.2);
-            text-align: center;
-        }
-
-        .admin-plaque-card {
-            background: var(--admin-plaque-bg);
-            border: 1.5px solid var(--admin-plaque-border);
-            border-radius: 12px;
-            padding: 14px;
-            margin-bottom: 14px;
-            box-shadow: 0 6px 18px rgba(0, 0, 0, 0.3);
-            text-align: center;
-        }
-
-        .plaque-name {
-            font-size: 21px;
-            font-weight: 900;
-            color: #fff;
-            margin-top: 8px;
-            margin-bottom: 8px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .admin-plaque-name {
-            font-size: 20px;
-            font-weight: 900;
-            color: #fff;
-            margin-top: 8px;
-            margin-bottom: 8px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .plaque-days-container {
-            display: flex;
-            justify-content: center;
-            gap: 8px;
-            margin-bottom: 8px;
-        }
-
-        .plaque-day-box {
-            background: var(--corp-badge-bg);
-            border: 1px solid rgba(0, 163, 224, 0.4);
-            border-radius: 8px;
-            padding: 6px 10px;
-            text-align: center;
-            flex: 1;
-        }
-
-        .plaque-day-name {
-            font-size: 9px;
-            font-weight: 800;
-            color: var(--text-muted);
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .plaque-day-date {
-            font-size: 12px;
-            font-weight: 900;
-            color: var(--corp-badge-text);
-            margin-top: 2px;
-            text-transform: uppercase;
-        }
-
-        .plaque-shift-badge-inline {
-            background: var(--corp-badge-bg);
-            color: var(--corp-badge-text);
-            border: 1px solid rgba(0, 163, 224, 0.5);
-            font-size: 11px;
-            font-weight: 900;
-            padding: 5px;
-            border-radius: 6px;
-            margin: 0 auto 8px auto;
-            letter-spacing: 1px;
-            text-transform: uppercase;
-            width: 100%;
-        }
-
-        .admin-time-badge-inline {
-            background: var(--corp-badge-bg);
-            color: var(--corp-badge-text);
-            border: 1px solid rgba(0, 163, 224, 0.5);
-            font-size: 11px;
-            font-weight: 900;
-            padding: 5px;
-            border-radius: 6px;
-            margin: 0 auto 8px auto;
-            letter-spacing: 1px;
-            text-transform: uppercase;
-            width: 100%;
-        }
-
-        .plaque-sector {
-            font-size: 11px;
-            font-weight: 700;
-            color: var(--text-muted);
-            background: rgba(255, 255, 255, 0.05);
-            padding: 4px 10px;
-            border-radius: 5px;
-            display: block;
-            width: fit-content;
-            margin: 0 auto 10px auto;
-            letter-spacing: 0.5px;
-            border: 1px solid var(--card-border);
-        }
-        
-        .plaque-sector strong {
-            color: var(--accent-blue);
-            font-weight: 900;
-        }
-
-        .plaque-info-box {
-            background: rgba(0, 0, 0, 0.3);
-            border: 1px solid var(--card-border);
-            border-radius: 8px;
-            padding: 8px;
-            margin-bottom: 10px;
-            font-size: 13px;
-            font-weight: 700;
-            color: var(--text-main);
-        }
-
-        .plaque-info-box span {
-            color: var(--text-muted);
-            font-weight: 600;
-        }
-
-        .plaque-actions {
-            display: flex;
-            justify-content: center;
-            gap: 8px;
-            flex-wrap: wrap;
-        }
-
-        .plaque-btn {
-            background: rgba(255, 255, 255, 0.08);
-            border: 1px solid var(--card-border);
-            border-radius: 8px;
-            padding: 7px 12px;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            color: #fff;
-            text-decoration: none;
-            font-size: 11px;
-            font-weight: 700;
-            transition: background 0.2s;
-        }
-
-        .plaque-btn:hover {
-            background: rgba(255, 255, 255, 0.2);
-        }
-
-        .plaque-btn svg {
-            width: 15px;
-            height: 15px;
-        }
-
-        /* Cuadro unificado normal */
+        /* Cuadro unificado de turnos optimizado para 7 días */
         .unified-card {
             background: var(--card-bg);
             border: 1px solid var(--card-border);
@@ -483,16 +279,15 @@
             <div class="brand">
                 <div class="logo-badge" onclick="handleLogoClick()" title="Tocar 5 veces para contraseña">P</div>
                 <div class="app-title">
-                    <h1>GUARDIA SIERRAS CHICAS</h1>
-                    <p>Supervisores</p>
+                    <h1>GUARDIA SUPERVISORES</h1>
+                    <p>Sierras Chicas • Operaciones</p>
                 </div>
             </div>
-            <!-- BOTÓN TEC / SUP ARRIBA A LA DERECHA -->
-            <button id="topModeBtn" class="top-mode-btn" onclick="toggleViewMode()">SUP</button>
+            <div class="personal-logo">personal</div>
         </header>
 
-        <!-- SELECTOR DE DÍAS -->
-        <div id="dateNavigator" class="date-navigator" style="display: none;">
+        <!-- SELECTOR DE DÍAS / SEMANAS -->
+        <div id="dateNavigator" class="date-navigator">
             <button class="nav-arrow" onclick="navigate(-1)">&#10094;</button>
             <div class="current-date-display">
                 <div class="main-label" id="lblRangoFechas">Fecha</div>
@@ -501,8 +296,15 @@
             <button class="nav-arrow" onclick="navigate(1)">&#10095;</button>
         </div>
 
-        <!-- CONTENEDOR DINÁMICO -->
-        <div id="appContainer"></div>
+        <!-- CUADRO UNIFICADO -->
+        <div class="unified-card">
+            <div class="days-header-grid" id="headerGridDays">
+                <!-- Dinámico -->
+            </div>
+            <div id="rowsSupervisorsContainer">
+                <div style="text-align:center; padding: 20px; color:var(--text-muted);">Cargando turnos en vivo...</div>
+            </div>
+        </div>
 
         <footer>Sierras Chicas • Panel Operativo</footer>
     </div>
@@ -511,45 +313,23 @@
         const API_URL = "https://script.google.com/macros/s/AKfycbzteLGryKx4kSM6cisczuYjauFyZKHP8j1F6QP19mLnIJbl2BU7VKTXF2kGXPwrgwY/exec";
 
         const supervisorsList = [
-            { key: "QUIROGA", name: "Quiroga Lucas", area: "Redes", phone: "5493515923910", cleanPhone: "3515923910", email: "lquiroga@personal.com.ar" },
-            { key: "MARELLI", name: "Marelli Pablo", area: "Redes", phone: "5493513570182", cleanPhone: "3513570182", email: "pmarelli@personal.com.ar" },
-            { key: "CERVELLERA", name: "Cervellera Diego", area: "Eventos", phone: "5493543601730", cleanPhone: "3543601730", email: "dmcervellera@personal.com.ar" },
-            { key: "SALDIVIA", name: "Saldivia Carlos", area: "Eventos", phone: "5493516146481", cleanPhone: "3516146481", email: "cmsaldivia@personal.com.ar" }
+            { key: "QUIROGA", name: "Quiroga Lucas", area: "Redes", phone: "5493515923910", email: "lquiroga@personal.com.ar" },
+            { key: "MARELLI", name: "Marelli Pablo", area: "Redes", phone: "5493513570182", email: "pmarelli@personal.com.ar" },
+            { key: "CERVELLERA", name: "Cervellera Diego", area: "Eventos", phone: "5493543601730", email: "dmcervellera@personal.com.ar" },
+            { key: "SALDIVIA", name: "Saldivia Carlos", area: "Eventos", phone: "5493516146481", email: "cmsaldivia@personal.com.ar" }
         ];
 
-        const administrativeData = {
-            name: "Escalante Dario",
-            sector: "Administrativo",
-            phone: "5493543691861",
-            cleanPhone: "3543691861",
-            email: "drescalante@personal.com.ar",
-            timeText: "07:30 A 16:00 HS"
-        };
-
         let rawSchedule = {};
-        let adminSchedule = {};
         let availableDates = [];
         let currentIndex = 0; 
         let baseWeekDate = new Date(); 
-        let isAuthorized = false; 
-        let isSupervisorMode = false; 
+        let isUnlocked = false; 
         let pClickCount = 0;
 
         async function loadSheetData() {
-            document.getElementById('dateNavigator').style.display = "none";
-            document.getElementById('appContainer').innerHTML = `
-                <div style="text-align:center; padding:50px 20px; color:var(--accent-blue);">
-                    <div class="spinner"></div>
-                    <div style="font-size:14px; font-weight:800; margin-bottom:6px; text-transform:uppercase; letter-spacing:0.5px;">Tomando datos en vivo</div>
-                    <div style="font-size:11px; color:var(--text-muted);">Aguarde por favor...</div>
-                </div>
-            `;
-
-            let fetchPromise = fetch(API_URL, { redirect: "follow" }).then(res => res.json());
-            let timerPromise = new Promise(resolve => setTimeout(resolve, 2000));
-
             try {
-                const [rows] = await Promise.all([fetchPromise, timerPromise]);
+                const response = await fetch(API_URL, { redirect: "follow" });
+                const rows = await response.json();
                 parseSheetRows(rows);
                 
                 if (availableDates.length > 0) {
@@ -565,7 +345,7 @@
                 renderApp();
             } catch (error) {
                 console.error("Error al procesar datos:", error);
-                document.getElementById('appContainer').innerHTML = 
+                document.getElementById('rowsSupervisorsContainer').innerHTML = 
                     `<div style="text-align:center; padding:15px; color:#f87171; font-size:11px;">Error al procesar datos del Google Sheet.</div>`;
             }
         }
@@ -581,48 +361,40 @@
                     let normalized = parseAnyDate(h);
                     if (normalized) {
                         let parsedObj = parseDateDetails(normalized);
-                        availableDates.push({ colIndex: c, dateStr: normalized, dayNum: parsedObj.dayNum, monthName: parsedObj.monthName, dayName: parsedObj.dayName });
+                        availableDates.push({ colIndex: c, dateStr: normalized, dayNum: parsedObj.dayNum, monthName: parsedObj.monthName });
                     }
                 }
             }
 
-            for (let r = 1; r < rows.length; r++) {
+            let maxRows = Math.min(rows.length, 6);
+            for (let r = 1; r < maxRows; r++) {
                 let row = rows[r];
                 if (!row || row.length < 2) continue;
-                let rowNameRaw = row[1] ? String(row[1]).trim().toUpperCase() : "";
+                let supNameRaw = row[1] ? String(row[1]).trim().toUpperCase() : "";
 
-                if (rowNameRaw.includes("ESCALANTE") || rowNameRaw.includes("DARIO")) {
+                let supKey = "";
+                if (supNameRaw.includes("QUIROGA")) supKey = "QUIROGA";
+                else if (supNameRaw.includes("MARELLI")) supKey = "MARELLI";
+                else if (supNameRaw.includes("CERVELLERA")) supKey = "CERVELLERA";
+                else if (supNameRaw.includes("SALDIVIA")) supKey = "SALDIVIA";
+
+                if (supKey) {
                     availableDates.forEach(item => {
                         let val = row[item.colIndex] !== undefined ? String(row[item.colIndex]).trim() : "";
-                        adminSchedule[item.dateStr] = val;
+                        if (!rawSchedule[item.dateStr]) {
+                            rawSchedule[item.dateStr] = {};
+                        }
+                        rawSchedule[item.dateStr][supKey] = val;
                     });
-                } else {
-                    let supKey = "";
-                    if (rowNameRaw.includes("QUIROGA")) supKey = "QUIROGA";
-                    else if (rowNameRaw.includes("MARELLI")) supKey = "MARELLI";
-                    else if (rowNameRaw.includes("CERVELLERA")) supKey = "CERVELLERA";
-                    else if (rowNameRaw.includes("SALDIVIA")) supKey = "SALDIVIA";
-
-                    if (supKey) {
-                        availableDates.forEach(item => {
-                            let val = row[item.colIndex] !== undefined ? String(row[item.colIndex]).trim() : "";
-                            if (!rawSchedule[item.dateStr]) {
-                                rawSchedule[item.dateStr] = {};
-                            }
-                            rawSchedule[item.dateStr][supKey] = val;
-                        });
-                    }
                 }
             }
         }
 
         function parseDateDetails(dateStr) {
             let p = dateStr.split('-');
-            let year = p[0], month = p[1], day = p[2];
-            let dObj = new Date(year, month - 1, day);
-            const daysNames = ['DOMINGO', 'LUNES', 'MARTES', 'MIÉRCOLES', 'JUEVES', 'VIERNES', 'SÁBADO'];
+            let month = p[1], day = p[2];
             const months = { '01': 'ENE', '02': 'FEB', '03': 'MAR', '04': 'ABR', '05': 'MAY', '06': 'JUN', '07': 'JUL', '08': 'AGO', '09': 'SEP', '10': 'OCT', '11': 'NOV', '12': 'DIC' };
-            return { dayNum: parseInt(day), monthName: months[month] || month, dayName: daysNames[dObj.getDay()] };
+            return { dayNum: parseInt(day), monthName: months[month] || month };
         }
 
         function parseAnyDate(str) {
@@ -664,10 +436,8 @@
                 pClickCount = 0;
                 let pin = prompt("INGRESE CONTRASEÑA DE MODO SUPERVISOR:");
                 if (pin === "1234") {
-                    isAuthorized = true;
-                    isSupervisorMode = true; 
+                    isUnlocked = true;
                     alert("¡BIENVENIDO!");
-                    document.getElementById('topModeBtn').classList.add('active');
                     renderApp();
                 } else if (pin !== null) {
                     alert("Contraseña incorrecta.");
@@ -677,13 +447,8 @@
             }
         }
 
-        function toggleViewMode() {
-            isSupervisorMode = !isSupervisorMode;
-            renderApp();
-        }
-
         function navigate(direction) {
-            if (isSupervisorMode) {
+            if (isUnlocked) {
                 baseWeekDate.setDate(baseWeekDate.getDate() + (direction * 7));
             } else {
                 let currentItem = availableDates[currentIndex];
@@ -706,7 +471,7 @@
         }
 
         function getDaysToDisplay() {
-            if (isSupervisorMode) {
+            if (isUnlocked) {
                 let d = new Date(baseWeekDate);
                 let day = d.getDay();
                 let diffToMonday = d.getDate() - day + (day === 0 ? -6 : 1);
@@ -727,44 +492,34 @@
                 let targetDate = new Date(p[0], p[1] - 1, p[2]);
                 let dayOfWeek = targetDate.getDay(); 
 
-                let hasTodayGuard = rawSchedule[targetDateStr] && Object.values(rawSchedule[targetDateStr]).includes("G");
-                if (dayOfWeek >= 1 && dayOfWeek <= 5 && !hasTodayGuard) {
-                    return [targetDateStr];
-                }
-
-                let backwardDays = [];
-                for (let i = 1; i <= 3; i++) {
-                    let prevD = new Date(targetDate);
-                    prevD.setDate(targetDate.getDate() - i);
-                    let pKey = formatDateKey(prevD);
-                    let isWeekend = (prevD.getDay() === 0 || prevD.getDay() === 6);
-                    let hasG = rawSchedule[pKey] && Object.values(rawSchedule[pKey]).includes("G");
-                    if (isWeekend || hasG) {
-                        backwardDays.unshift(pKey);
-                    } else {
-                        break;
+                let hasGuardNearby = false;
+                let scanStart = new Date(targetDate);
+                scanStart.setDate(scanStart.getDate() - 1);
+                for(let i=0; i<3; i++) {
+                    let checkD = new Date(scanStart);
+                    checkD.setDate(scanStart.getDate() + i);
+                    let cKey = formatDateKey(checkD);
+                    if(rawSchedule[cKey]) {
+                        Object.values(rawSchedule[cKey]).forEach(val => {
+                            if(val === "G") hasGuardNearby = true;
+                        });
                     }
                 }
 
-                let forwardDays = [];
-                for (let i = 1; i <= 3; i++) {
-                    let nextD = new Date(targetDate);
-                    nextD.setDate(targetDate.getDate() + i);
-                    let nKey = formatDateKey(nextD);
-                    let isWeekend = (nextD.getDay() === 0 || nextD.getDay() === 6);
-                    let hasG = rawSchedule[nKey] && Object.values(rawSchedule[nKey]).includes("G");
-                    if (isWeekend || hasG) {
-                        forwardDays.push(nKey);
-                    } else {
-                        break;
+                if (dayOfWeek === 0 || dayOfWeek === 6 || hasGuardNearby) {
+                    let activeDays = [];
+                    let blockStart = new Date(targetDate);
+                    blockStart.setDate(blockStart.getDate() - 1);
+                    
+                    for(let i=0; i<3; i++) {
+                        let currentD = new Date(blockStart);
+                        currentD.setDate(blockStart.getDate() + i);
+                        let cKey = formatDateKey(currentD);
+                        if(availableDates.some(d => d.dateStr === cKey)) {
+                            activeDays.push(cKey);
+                        }
                     }
-                }
-
-                let combined = [...backwardDays, targetDateStr, ...forwardDays];
-                let uniqueDays = [...new Set(combined)].filter(dStr => availableDates.some(d => d.dateStr === dStr));
-
-                if (uniqueDays.length >= 2 || hasTodayGuard) {
-                    return uniqueDays;
+                    if(activeDays.length >= 2) return activeDays;
                 }
 
                 return [targetDateStr];
@@ -775,357 +530,81 @@
             if (availableDates.length === 0) return;
 
             let daysArr = getDaysToDisplay();
-            const container = document.getElementById('appContainer');
-            const navBar = document.getElementById('dateNavigator');
-            let topModeBtn = document.getElementById('topModeBtn');
 
-            if (isSupervisorMode) {
-                topModeBtn.innerText = "TEC";
-                topModeBtn.title = "Cambiar a Modo Técnico";
-            } else {
-                topModeBtn.innerText = "SUP";
-                topModeBtn.title = "Cambiar a Modo Supervisor";
-            }
-
-            if (isSupervisorMode) {
-                navBar.style.display = "flex";
+            if (isUnlocked) {
                 document.getElementById('lblRangoFechas').innerText = `MODO SUPERVISOR (SEMANA)`;
                 document.getElementById('lblSubSemana').innerText = `Auditoría activa`;
-                
-                let colWidths = `115px ` + `repeat(${daysArr.length}, 1fr)`;
-                let html = `<div class="unified-card">
-                    <div class="days-header-grid" id="headerGridDays" style="grid-template-columns: ${colWidths};">
-                        <div class="col-sup">SUPERVISOR</div>`;
-                
-                daysArr.forEach((dateStr) => {
-                    let foundObj = availableDates.find(d => d.dateStr === dateStr);
-                    if (foundObj) {
-                        html += `<div><span style="font-size:8px; color:var(--text-muted); display:block;">${foundObj.monthName}</span><span style="font-size:11px; font-weight:800;">${foundObj.dayNum}</span></div>`;
-                    } else {
-                        html += `<div><span>${dateStr}</span></div>`;
-                    }
-                });
-                html += `</div><div id="rowsSupervisorsContainer">`;
-
-                supervisorsList.forEach(sup => {
-                    html += `
-                        <div class="supervisor-row" style="grid-template-columns: ${colWidths};">
-                            <div class="sup-info">
-                                <div class="sup-name">${sup.name}</div>
-                                <div class="sup-area">${sup.area}</div>
-                            </div>`;
-
-                    daysArr.forEach(dateStr => {
-                        let dayData = rawSchedule[dateStr] || {};
-                        let val = dayData[sup.key] || "";
-                        let badgeClass = "badge-empty";
-                        let displayText = "-";
-
-                        if (val === "AM") { badgeClass = "badge-am"; displayText = "AM"; }
-                        else if (val === "PM") { badgeClass = "badge-pm"; displayText = "PM"; }
-                        else if (val === "G") { badgeClass = "badge-guardia"; displayText = "AM<br>PM"; }
-                        else if (val === "FC") { badgeClass = "badge-franco"; displayText = "FC"; }
-                        else if (val === "VAC") { badgeClass = "badge-franco"; displayText = "VAC"; }
-
-                        html += `<div class="shift-cell ${badgeClass}">${displayText}</div>`;
-                    });
-
-                    html += `</div>`;
-                });
-
-                html += `</div></div>`;
-                container.innerHTML = html;
-
             } else {
-                // MODO TÉCNICO
-                if (daysArr.length > 1) {
-                    if (isAuthorized) {
-                        navBar.style.display = "flex";
-                        let currentItem = availableDates[currentIndex];
-                        document.getElementById('lblRangoFechas').innerText = currentItem ? `${currentItem.dayNum} ${currentItem.monthName}` : "FECHA";
-                        document.getElementById('lblSubSemana').innerText = `Bloque fin de semana / Guardia`;
-                    } else {
-                        navBar.style.display = "none";
-                    }
-
-                    let supervisorSchedules = {};
-
-                    supervisorsList.forEach(sup => {
-                        let workingDaysList = [];
-                        daysArr.forEach(dateStr => {
-                            let dayData = rawSchedule[dateStr] || {};
-                            let val = dayData[sup.key] || "";
-                            if (val === "G" || val === "AM" || val === "PM") {
-                                let fObj = availableDates.find(d => d.dateStr === dateStr);
-                                if (fObj) {
-                                    workingDaysList.push({
-                                        dateStr: dateStr,
-                                        dayName: fObj.dayName,
-                                        dayNum: fObj.dayNum,
-                                        monthName: fObj.monthName
-                                    });
-                                }
-                            }
-                        });
-
-                        if (workingDaysList.length > 0) {
-                            supervisorSchedules[sup.key] = {
-                                supervisor: sup,
-                                days: workingDaysList
-                            };
-                        }
-                    });
-
-                    let plaquesHtml = '';
-                    Object.values(supervisorSchedules).forEach(item => {
-                        let sup = item.supervisor;
-                        
-                        let daysBoxesHtml = '';
-                        item.days.forEach(dInfo => {
-                            daysBoxesHtml += `
-                                <div class="plaque-day-box">
-                                    <div class="plaque-day-name">${dInfo.dayName}</div>
-                                    <div class="plaque-day-date">${dInfo.dayNum} ${dInfo.monthName}</div>
-                                </div>
-                            `;
-                        });
-
-                        plaquesHtml += `
-                            <div class="guard-plaque-card">
-                                <div class="plaque-days-container">
-                                    ${daysBoxesHtml}
-                                </div>
-                                <div class="plaque-shift-badge-inline">AM + PM</div>
-                                <div class="plaque-name">${sup.name}</div>
-                                <div class="plaque-sector">SECTOR: <strong>EVENTOS + REDES</strong></div>
-                                <div class="plaque-info-box">
-                                    <span>Celular:</span> ${sup.cleanPhone}<br>
-                                    <span>Correo:</span> ${sup.email}
-                                </div>
-                                <div class="plaque-actions">
-                                    <a href="tel:+${sup.phone}" class="plaque-btn" title="Llamada directa">
-                                        <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width:15px;height:15px;"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
-                                        Llamar
-                                    </a>
-                                    <a href="https://wa.me/${sup.phone}" target="_blank" class="plaque-btn">
-                                        <svg viewBox="0 0 24 24" fill="#25D366"><path d="M17.472 14.382c-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.096 3.2 5.077 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.84 9.84 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.41 0 0 5.41 0 12.053c0 2.11.553 4.162 1.604 5.971L0 24l6.143-1.605a11.83 11.83 0 005.905 1.585h.005c6.64 0 12.05-5.41 12.05-12.05a11.9 11.9 0 00-3.488-8.413z"/></svg>
-                                        WhatsApp
-                                    </a>
-                                    <a href="mailto:${sup.email}" class="plaque-btn">
-                                        <svg viewBox="0 0 24 24"><path fill="#0078D4" d="M12.5 2.5l9 5.2v10.6l-9 5.2-9-5.2V7.7l9-5.2z"/><path fill="#198AB3" d="M12.5 2.5v21l9-5.2V7.7l-9-5.2z"/><path fill="#005A9E" d="M12.5 13.5L3.5 8.3l9-5.2 9 5.2-9 5.2z"/><path fill="#002050" d="M3.5 8.3v9.5l9 5.2v-11.1l-9-3.6z"/><circle cx="8" cy="15" r="4.5" fill="#0078D4"/><text x="8" y="17.2" font-size="6.5" font-weight="bold" fill="#ffffff" text-anchor="middle">O</text></svg>
-                                        Correo
-                                    </a>
-                                </div>
-                            </div>`;
-                    });
-                    container.innerHTML = plaquesHtml;
-
-                    let adminBoxesHtml = '';
-                    let hasAdminWorking = false;
-                    daysArr.forEach(dateStr => {
-                        let adminVal = adminSchedule[dateStr] || "";
-                        if (adminVal === "G" || adminVal === "AM" || adminVal === "PM") {
-                            hasAdminWorking = true;
-                            let fObj = availableDates.find(d => d.dateStr === dateStr);
-                            if (fObj) {
-                                adminBoxesHtml += `
-                                    <div class="plaque-day-box">
-                                        <div class="plaque-day-name">${fObj.dayName}</div>
-                                        <div class="plaque-day-date">${fObj.dayNum} ${fObj.monthName}</div>
-                                    </div>
-                                `;
-                            }
-                        }
-                    });
-
-                    if (hasAdminWorking) {
-                        let adminPlaqueHtml = `
-                            <div class="admin-plaque-card" style="margin-top: 14px;">
-                                <div class="plaque-days-container">
-                                    ${adminBoxesHtml}
-                                </div>
-                                <div class="admin-time-badge-inline">${administrativeData.timeText}</div>
-                                <div class="admin-plaque-name">${administrativeData.name}</div>
-                                <div class="plaque-sector">SECTOR: <strong>${administrativeData.sector.toUpperCase()}</strong></div>
-                                <div class="plaque-info-box">
-                                    <span>Celular:</span> ${administrativeData.cleanPhone}<br>
-                                    <span>Correo:</span> ${administrativeData.email}
-                                </div>
-                                <div class="plaque-actions">
-                                    <a href="tel:+${administrativeData.phone}" class="plaque-btn" title="Llamada directa">
-                                        <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width:15px;height:15px;"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
-                                        Llamar
-                                    </a>
-                                    <a href="https://wa.me/${administrativeData.phone}" target="_blank" class="plaque-btn">
-                                        <svg viewBox="0 0 24 24" fill="#25D366"><path d="M17.472 14.382c-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.096 3.2 5.077 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.84 9.84 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.41 0 0 5.41 0 12.053c0 2.11.553 4.162 1.604 5.971L0 24l6.143-1.605a11.83 11.83 0 005.905 1.585h.005c6.64 0 12.05-5.41 12.05-12.05a11.9 11.9 0 00-3.488-8.413z"/></svg>
-                                        WhatsApp
-                                    </a>
-                                    <a href="mailto:${administrativeData.email}" class="plaque-btn">
-                                        <svg viewBox="0 0 24 24"><path fill="#0078D4" d="M12.5 2.5l9 5.2v10.6l-9 5.2-9-5.2V7.7l9-5.2z"/><path fill="#198AB3" d="M12.5 2.5v21l9-5.2V7.7l-9-5.2z"/><path fill="#005A9E" d="M12.5 13.5L3.5 8.3l9-5.2 9 5.2-9 5.2z"/><path fill="#002050" d="M3.5 8.3v9.5l9 5.2v-11.1l-9-3.6z"/><circle cx="8" cy="15" r="4.5" fill="#0078D4"/><text x="8" y="17.2" font-size="6.5" font-weight="bold" fill="#ffffff" text-anchor="middle">O</text></svg>
-                                        Correo
-                                    </a>
-                                </div>
-                            </div>
-                        `;
-                        container.innerHTML += adminPlaqueHtml;
-                    }
-
-                } else {
-                    if (isAuthorized) {
-                        navBar.style.display = "flex";
-                        let currentItem = availableDates[currentIndex];
-                        document.getElementById('lblRangoFechas').innerText = currentItem ? `${currentItem.dayNum} ${currentItem.monthName}` : "FECHA";
-                        document.getElementById('lblSubSemana').innerText = `Modo técnico`;
-                    } else {
-                        navBar.style.display = "none";
-                    }
-
-                    let targetDateStr = daysArr[0];
-                    let activeGuardSupervisor = null;
-
-                    supervisorsList.forEach(sup => {
-                        let dayData = rawSchedule[targetDateStr] || {};
-                        let val = dayData[sup.key] ? String(dayData[sup.key]).trim() : "";
-                        if (val === "G") {
-                            activeGuardSupervisor = sup;
-                        }
-                    });
-
-                    if (activeGuardSupervisor) {
-                        let foundObj = availableDates.find(d => d.dateStr === targetDateStr);
-                        let dayBoxHtml = `
-                            <div class="plaque-day-box" style="flex: 1;">
-                                <div class="plaque-day-name">${foundObj ? foundObj.dayName : ''}</div>
-                                <div class="plaque-day-date">${foundObj ? foundObj.dayNum + ' ' + foundObj.monthName : ''}</div>
-                            </div>
-                        `;
-
-                        let plaqueHtml = `
-                            <div class="guard-plaque-card">
-                                <div class="plaque-days-container">
-                                    ${dayBoxHtml}
-                                </div>
-                                <div class="plaque-shift-badge-inline">AM + PM</div>
-                                <div class="plaque-name">${activeGuardSupervisor.name}</div>
-                                <div class="plaque-sector">SECTOR: <strong>EVENTOS + REDES</strong></div>
-                                <div class="plaque-info-box">
-                                    <span>Celular:</span> ${activeGuardSupervisor.cleanPhone}<br>
-                                    <span>Correo:</span> ${activeGuardSupervisor.email}
-                                </div>
-                                <div class="plaque-actions">
-                                    <a href="tel:+${activeGuardSupervisor.phone}" class="plaque-btn" title="Llamada directa">
-                                        <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width:15px;height:15px;"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
-                                        Llamar
-                                    </a>
-                                    <a href="https://wa.me/${activeGuardSupervisor.phone}" target="_blank" class="plaque-btn">
-                                        <svg viewBox="0 0 24 24" fill="#25D366"><path d="M17.472 14.382c-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.096 3.2 5.077 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.84 9.84 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.41 0 0 5.41 0 12.053c0 2.11.553 4.162 1.604 5.971L0 24/6.143-1.605a11.83 11.83 0 005.905 1.585h.005c6.64 0 12.05-5.41 12.05-12.05a11.9 11.9 0 00-3.488-8.413z"/></svg>
-                                        WhatsApp
-                                    </a>
-                                    <a href="mailto:${activeGuardSupervisor.email}" class="plaque-btn">
-                                        <svg viewBox="0 0 24 24"><path fill="#0078D4" d="M12.5 2.5l9 5.2v10.6l-9 5.2-9-5.2V7.7l9-5.2z"/><path fill="#198AB3" d="M12.5 2.5v21l9-5.2V7.7l-9-5.2z"/><path fill="#005A9E" d="M12.5 13.5L3.5 8.3l9-5.2 9 5.2-9 5.2z"/><path fill="#002050" d="M3.5 8.3v9.5l9 5.2v-11.1l-9-3.6z"/><circle cx="8" cy="15" r="4.5" fill="#0078D4"/><text x="8" y="17.2" font-size="6.5" font-weight="bold" fill="#ffffff" text-anchor="middle">O</text></svg>
-                                        Correo
-                                    </a>
-                                </div>
-                            </div>
-                        `;
-                        container.innerHTML = plaqueHtml;
-                    } else {
-                        let activeTechSupervisors = supervisorsList.filter(sup => {
-                            let dayData = rawSchedule[daysArr[0]] || {};
-                            let val = dayData[sup.key] ? String(dayData[sup.key]).trim() : "";
-                            return val !== "" && val !== "FC" && val !== "VAC";
-                        });
-
-                        let foundObj = availableDates.find(d => d.dateStr === daysArr[0]);
-                        let dayNameText = foundObj ? foundObj.dayName : "";
-                        let dayNumText = foundObj ? foundObj.dayNum : "";
-                        let monthText = foundObj ? foundObj.monthName : "";
-
-                        let colWidths = `115px repeat(1, 1fr)`;
-                        let html = `<div class="unified-card">
-                            <div class="days-header-grid" id="headerGridDays" style="grid-template-columns: ${colWidths};">
-                                <div class="col-sup">SUPERVISOR</div>`;
-                        
-                        html += `<div><span style="font-size:8px; color:var(--text-muted); display:block;">${dayNameText}</span><span style="font-size:11px; font-weight:800;">${dayNumText} ${monthText}</span></div>`;
-                        html += `</div><div id="rowsSupervisorsContainer">`;
-
-                        if (activeTechSupervisors.length === 0) {
-                            html += `<div style="text-align:center; padding:15px; font-size:11px; color:var(--text-muted);">No hay personal activo en este día.</div>`;
-                        } else {
-                            activeTechSupervisors.forEach(sup => {
-                                html += `
-                                    <div class="supervisor-row" style="grid-template-columns: ${colWidths};">
-                                        <div class="sup-info">
-                                            <div class="sup-name">${sup.name}</div>
-                                            <div class="sup-area">${sup.area}</div>
-                                            <div class="sup-contact-icons">
-                                                <a href="tel:+${sup.phone}" class="contact-btn" title="Llamada directa">
-                                                    <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width:17px;height:17px;"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
-                                                </a>
-                                                <a href="https://wa.me/${sup.phone}" target="_blank" class="contact-btn" title="Enviar WhatsApp">
-                                                    <svg viewBox="0 0 24 24" fill="#25D366"><path d="M17.472 14.382c-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.096 3.2 5.077 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.84 9.84 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.41 0 0 5.41 0 12.053c0 2.11.553 4.162 1.604 5.971L0 24/6.143-1.605a11.83 11.83 0 005.905 1.585h.005c6.64 0 12.05-5.41 12.05-12.05a11.9 11.9 0 00-3.488-8.413z"/></svg>
-                                            </a>
-                                            <a href="mailto:${sup.email}" class="plaque-btn" title="Enviar Correo Outlook">
-                                                <svg viewBox="0 0 24 24"><path fill="#0078D4" d="M12.5 2.5l9 5.2v10.6l-9 5.2-9-5.2V7.7l9-5.2z"/><path fill="#198AB3" d="M12.5 2.5v21l9-5.2V7.7l-9-5.2z"/><path fill="#005A9E" d="M12.5 13.5L3.5 8.3l9-5.2 9 5.2-9 5.2z"/><path fill="#002050" d="M3.5 8.3v9.5l9 5.2v-11.1l-9-3.6z"/><circle cx="8" cy="15" r="4.5" fill="#0078D4"/><text x="8" y="17.2" font-size="6.5" font-weight="bold" fill="#ffffff" text-anchor="middle">O</text></svg>
-                                            </a>
-                                        </div>
-                                    </div>`;
-
-                                let dayData = rawSchedule[daysArr[0]] || {};
-                                let val = dayData[sup.key] ? String(dayData[sup.key]).trim() : "";
-                                let badgeClass = "badge-empty";
-                                let displayText = "-";
-
-                                if (val === "AM") { badgeClass = "badge-am"; displayText = "AM"; }
-                                else if (val === "PM") { badgeClass = "badge-pm"; displayText = "PM"; }
-                                else if (val === "G") { badgeClass = "badge-guardia"; displayText = "AM<br>PM"; }
-
-                                html += `<div class="shift-cell ${badgeClass}">${displayText}</div>`;
-                                html += `</div>`;
-                            });
-                        }
-
-                        let singleDayStr = daysArr[0];
-                        let adminValSingle = adminSchedule[singleDayStr] || "";
-                        if (adminValSingle === "G" || adminValSingle === "AM" || adminValSingle === "PM") {
-                            let foundObj = availableDates.find(d => d.dateStr === singleDayStr);
-
-                            html += `
-                                <div class="admin-plaque-card" style="margin-top: 14px;">
-                                    <div class="plaque-days-container">
-                                        <div class="plaque-day-box" style="flex: 1;">
-                                            <div class="plaque-day-name">${foundObj ? foundObj.dayName : ''}</div>
-                                            <div class="plaque-day-date">${foundObj ? foundObj.dayNum + ' ' + foundObj.monthName : ''}</div>
-                                        </div>
-                                    </div>
-                                    <div class="admin-time-badge-inline">${administrativeData.timeText}</div>
-                                    <div class="admin-plaque-name">${administrativeData.name}</div>
-                                    <div class="plaque-sector">SECTOR: <strong>${administrativeData.sector.toUpperCase()}</strong></div>
-                                    <div class="plaque-info-box">
-                                        <span>Celular:</span> ${administrativeData.cleanPhone}<br>
-                                        <span>Correo:</span> ${administrativeData.email}
-                                    </div>
-                                    <div class="plaque-actions">
-                                        <a href="tel:+${administrativeData.phone}" class="plaque-btn" title="Llamada directa">
-                                            <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width:15px;height:15px;"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
-                                            Llamar
-                                        </a>
-                                        <a href="https://wa.me/${administrativeData.phone}" target="_blank" class="plaque-btn">
-                                            <svg viewBox="0 0 24 24" fill="#25D366"><path d="M17.472 14.382c-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.096 3.2 5.077 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.84 9.84 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.41 0 0 5.41 0 12.053c0 2.11.553 4.162 1.604 5.971L0 24l6.143-1.605a11.83 11.83 0 005.905 1.585h.005c6.64 0 12.05-5.41 12.05-12.05a11.9 11.9 0 00-3.488-8.413z"/></svg>
-                                        WhatsApp
-                                    </a>
-                                    <a href="mailto:${administrativeData.email}" class="plaque-btn">
-                                        <svg viewBox="0 0 24 24"><path fill="#0078D4" d="M12.5 2.5l9 5.2v10.6l-9 5.2-9-5.2V7.7l9-5.2z"/><path fill="#198AB3" d="M12.5 2.5v21l9-5.2V7.7l-9-5.2z"/><path fill="#005A9E" d="M12.5 13.5L3.5 8.3l9-5.2 9 5.2-9 5.2z"/><path fill="#002050" d="M3.5 8.3v9.5l9 5.2v-11.1l-9-3.6z"/><circle cx="8" cy="15" r="4.5" fill="#0078D4"/><text x="8" y="17.2" font-size="6.5" font-weight="bold" fill="#ffffff" text-anchor="middle">O</text></svg>
-                                        Correo
-                                    </a>
-                                </div>
-                            </div>
-                        `;
-                        container.innerHTML += adminPlaqueHtml;
-                    }
-
-                }
+                let currentItem = availableDates[currentIndex];
+                document.getElementById('lblRangoFechas').innerText = currentItem ? `${currentItem.dayNum} ${currentItem.monthName}` : "FECHA";
+                document.getElementById('lblSubSemana').innerText = daysArr.length > 1 ? `Bloque fin de semana / Guardia` : `Modo técnico`;
             }
+
+            // Columna de nombres ajustada a 115px para que los 7 días entren holgados sin deslizar
+            let colWidths = `115px ` + `repeat(${daysArr.length}, 1fr)`;
+            document.getElementById('headerGridDays').style.gridTemplateColumns = colWidths;
+
+            let headerHtml = `<div class="col-sup">SUP</div>`;
+            daysArr.forEach((dateStr) => {
+                let foundObj = availableDates.find(d => d.dateStr === dateStr);
+                if (foundObj) {
+                    // Muestra el Mes arriba pequeño y el número de día abajo grande
+                    headerHtml += `<div><span style="font-size:8px; color:var(--text-muted); display:block;">${foundObj.monthName}</span><span style="font-size:11px; font-weight:800;">${foundObj.dayNum}</span></div>`;
+                } else {
+                    headerHtml += `<div><span>${dateStr}</span></div>`;
+                }
+            });
+            document.getElementById('headerGridDays').innerHTML = headerHtml;
+
+            let rowsHtml = '';
+            supervisorsList.forEach(sup => {
+                rowsHtml += `
+                    <div class="supervisor-row" style="grid-template-columns: ${colWidths};">
+                        <div class="sup-info">
+                            <div class="sup-name">${sup.name}</div>
+                            <div class="sup-area">${sup.area}</div>
+                            <div class="sup-contact-icons">
+                                <a href="https://wa.me/${sup.phone}" target="_blank" class="contact-btn" title="Enviar WhatsApp">
+                                    <svg viewBox="0 0 24 24" fill="#25D366"><path d="M17.472 14.382c-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.096 3.2 5.077 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.84 9.84 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.41 0 0 5.41 0 12.053c0 2.11.553 4.162 1.604 5.971L0 24l6.143-1.605a11.83 11.83 0 005.905 1.585h.005c6.64 0 12.05-5.41 12.05-12.05a11.9 11.9 0 00-3.488-8.413z"/></svg>
+                                </a>
+                                <a href="mailto:${sup.email}" class="contact-btn" title="Enviar Correo Outlook">
+                                    <svg viewBox="0 0 24 24"><path fill="#0078D4" d="M12.5 2.5l9 5.2v10.6l-9 5.2-9-5.2V7.7l9-5.2z"/><path fill="#198AB3" d="M12.5 2.5v21l9-5.2V7.7l-9-5.2z"/><path fill="#005A9E" d="M12.5 13.5L3.5 8.3l9-5.2 9 5.2-9 5.2z"/><path fill="#002050" d="M3.5 8.3v9.5l9 5.2v-11.1l-9-3.6z"/><circle cx="8" cy="15" r="4.5" fill="#0078D4"/><text x="8" y="17.2" font-size="6.5" font-weight="bold" fill="#ffffff" text-anchor="middle">O</text></svg>
+                                </a>
+                            </div>
+                        </div>
+                `;
+
+                daysArr.forEach(dateStr => {
+                    let dayData = rawSchedule[dateStr] || {};
+                    let val = dayData[sup.key] || "";
+
+                    let badgeClass = "badge-empty";
+                    let displayText = "-";
+
+                    if (val === "AM") {
+                        badgeClass = "badge-am";
+                        displayText = "AM";
+                    } else if (val === "PM") {
+                        badgeClass = "badge-pm";
+                        displayText = "PM";
+                    } else if (val === "G") {
+                        badgeClass = "badge-guardia";
+                        displayText = "AM<br>PM"; // AM arriba y PM abajo
+                    } else if (val === "FC") {
+                        badgeClass = "badge-franco";
+                        displayText = "FC";
+                    } else if (val === "VAC") {
+                        badgeClass = "badge-franco";
+                        displayText = "VAC";
+                    }
+
+                    rowsHtml += `<div class="shift-cell ${badgeClass}">${displayText}</div>`;
+                });
+
+                rowsHtml += `</div>`;
+            });
+
+            document.getElementById('rowsSupervisorsContainer').innerHTML = rowsHtml;
         }
 
         loadSheetData();
