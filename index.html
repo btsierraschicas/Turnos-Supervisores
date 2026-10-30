@@ -89,41 +89,29 @@
         }
 
         .app-title p {
-            font-size: 11px;
+            font-size: 10px;
             color: var(--text-muted);
             margin-top: 1px;
+            font-weight: 600;
+            text-transform: uppercase;
         }
 
-        .personal-logo {
-            font-size: 16px;
-            font-weight: 900;
-            color: var(--accent-blue);
-            letter-spacing: -0.5px;
-            background: rgba(0, 163, 224, 0.1);
-            padding: 5px 8px;
-            border-radius: 7px;
-            border: 1px solid rgba(0, 163, 224, 0.3);
-        }
-
-        /* Botón de alternancia (Modo Supervisor) */
-        .mode-toggle-bar {
+        /* Botón TEC / SUP integrado arriba a la derecha */
+        .top-mode-btn {
             display: none;
-            justify-content: center;
-            margin-bottom: 10px;
-        }
-        .mode-toggle-bar.active {
-            display: flex;
-        }
-        .toggle-btn {
             background: linear-gradient(135deg, #00a3e0, #0077a3);
             color: #fff;
-            border: none;
-            padding: 7px 16px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: 700;
+            border: 1px solid rgba(255,255,255,0.2);
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-size: 11px;
+            font-weight: 900;
             cursor: pointer;
-            box-shadow: 0 2px 8px rgba(0, 163, 224, 0.3);
+            box-shadow: 0 2px 8px rgba(0, 163, 224, 0.4);
+            letter-spacing: 0.5px;
+        }
+        .top-mode-btn.active {
+            display: inline-block;
         }
 
         /* Selector de días */
@@ -407,7 +395,6 @@
             margin-top: 1px;
         }
 
-        /* Botones compactos estrictos para Modo Técnico grilla */
         .sup-contact-icons {
             display: flex;
             gap: 6px;
@@ -474,17 +461,13 @@
             <div class="brand">
                 <div class="logo-badge" onclick="handleLogoClick()" title="Tocar 5 veces para contraseña">P</div>
                 <div class="app-title">
-                    <h1>GUARDIA SUPERVISORES</h1>
-                    <p>Sierras Chicas • Operaciones</p>
+                    <h1>GUARDIA SIERRAS CHICAS</h1>
+                    <p>Supervisores</p>
                 </div>
             </div>
-            <div class="personal-logo">personal</div>
+            <!-- BOTÓN TEC / SUP ARRIBA A LA DERECHA -->
+            <button id="topModeBtn" class="top-mode-btn" onclick="toggleViewMode()">SUP</button>
         </header>
-
-        <!-- BOTÓN DE ALTERNANCIA (MODO SUPERVISOR) -->
-        <div id="modeToggleBar" class="mode-toggle-bar">
-            <button class="toggle-btn" id="toggleModeBtn" onclick="toggleViewMode()">Cambiar a Modo Técnico</button>
-        </div>
 
         <!-- SELECTOR DE DÍAS -->
         <div id="dateNavigator" class="date-navigator">
@@ -660,7 +643,7 @@
                     isAuthorized = true;
                     isSupervisorMode = true; 
                     alert("¡BIENVENIDO!");
-                    document.getElementById('modeToggleBar').classList.add('active');
+                    document.getElementById('topModeBtn').classList.add('active');
                     renderApp();
                 } else if (pin !== null) {
                     alert("Contraseña incorrecta.");
@@ -770,12 +753,15 @@
             let daysArr = getDaysToDisplay();
             const container = document.getElementById('appContainer');
             const navBar = document.getElementById('dateNavigator');
-            let toggleBtn = document.getElementById('toggleModeBtn');
+            let topModeBtn = document.getElementById('topModeBtn');
 
+            // Actualizar texto del botón superior TEC / SUP
             if (isSupervisorMode) {
-                toggleBtn.innerText = "Cambiar a Modo Técnico";
+                topModeBtn.innerText = "TEC";
+                topModeBtn.title = "Cambiar a Modo Técnico";
             } else {
-                toggleBtn.innerText = "Cambiar a Modo Supervisor";
+                topModeBtn.innerText = "SUP";
+                topModeBtn.title = "Cambiar a Modo Supervisor";
             }
 
             if (isSupervisorMode) {
@@ -974,7 +960,6 @@
                     let targetDateStr = daysArr[0];
                     let activeGuardSupervisor = null;
 
-                    // Buscar si hay algún supervisor de guardia ("G") en este día aislado
                     supervisorsList.forEach(sup => {
                         let dayData = rawSchedule[targetDateStr] || {};
                         let val = dayData[sup.key] ? String(dayData[sup.key]).trim() : "";
@@ -984,7 +969,6 @@
                     });
 
                     if (activeGuardSupervisor) {
-                        // Si hay una guardia "G" en un día aislado, renderizarlo como PLACA imponente
                         let foundObj = availableDates.find(d => d.dateStr === targetDateStr);
                         let dayBoxHtml = `
                             <div class="plaque-day-box" style="flex: 1;">
@@ -1023,7 +1007,6 @@
                         `;
                         container.innerHTML = plaqueHtml;
                     } else {
-                        // Caso normal de día de semana sin guardia G aislada
                         let activeTechSupervisors = supervisorsList.filter(sup => {
                             let dayData = rawSchedule[daysArr[0]] || {};
                             let val = dayData[sup.key] ? String(dayData[sup.key]).trim() : "";
@@ -1082,14 +1065,14 @@
                         let singleDayStr = daysArr[0];
                         let adminValSingle = adminSchedule[singleDayStr] || "";
                         if (adminValSingle === "G" || adminValSingle === "AM" || adminValSingle === "PM") {
-                            let foundDayObj = availableDates.find(d => d.dateStr === singleDayStr);
+                            let foundObj = availableDates.find(d => d.dateStr === singleDayStr);
 
                             html += `
                                 <div class="admin-plaque-card" style="margin-top: 14px;">
                                     <div class="plaque-days-container">
                                         <div class="plaque-day-box" style="flex: 1;">
-                                            <div class="plaque-day-name">${foundDayObj ? foundDayObj.dayName : ''}</div>
-                                            <div class="plaque-day-date">${foundDayObj ? foundDayObj.dayNum + ' ' + foundDayObj.monthName : ''}</div>
+                                            <div class="plaque-day-name">${foundObj ? foundObj.dayName : ''}</div>
+                                            <div class="plaque-day-date">${foundObj ? foundObj.dayNum + ' ' + foundObj.monthName : ''}</div>
                                         </div>
                                     </div>
                                     <div class="admin-time-badge-inline">${administrativeData.timeText}</div>
