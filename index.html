@@ -707,7 +707,7 @@
             if (pClickCount >= 5) {
                 pClickCount = 0;
                 let pin = prompt("INGRESE CONTRASEÑA DE MODO SUPERVISOR:");
-                if (pin === "1234") {
+                if (pin === "202023") {
                     isAuthorized = true;
                     isSupervisorMode = true; 
                     alert("¡BIENVENIDO!");
@@ -731,12 +731,10 @@
                 baseWeekDate.setDate(baseWeekDate.getDate() + (direction * 7));
             } else {
                 if (isAuthorized) {
-                    // Si ya ingresó la clave, en modo técnico navega libremente por los días del excel
                     currentIndex += direction;
                     if (currentIndex < 0) currentIndex = 0;
                     if (currentIndex >= availableDates.length) currentIndex = availableDates.length - 1;
                 } else {
-                    // Sin clave: limitado a avanzar solo 1 día (del viernes al sábado)
                     let newIndex = currentIndex + direction;
                     if (newIndex < originalTodayIndex) newIndex = originalTodayIndex;
                     if (newIndex > originalTodayIndex + 1) newIndex = originalTodayIndex + 1;
@@ -1015,7 +1013,6 @@
                     // Modo técnico de un solo día
                     navBar.style.display = "flex";
                     
-                    // Si está autorizado con clave, las flechas están siempre visibles y libres; si no, aplica el límite de 1 día
                     if (isAuthorized) {
                         document.getElementById('btnPrev').style.visibility = "visible";
                         document.getElementById('btnNext').style.visibility = "visible";
