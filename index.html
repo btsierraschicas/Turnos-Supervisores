@@ -45,6 +45,55 @@
             min-height: 100vh;
         }
 
+        /* Pantalla de carga / Logo que late */
+        #splash-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: var(--bg-color);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            transition: opacity 0.5s ease;
+        }
+
+        .splash-logo {
+            width: 110px;
+            height: 110px;
+            border-radius: 24px;
+            object-fit: cover;
+            box-shadow: 0 0 25px rgba(0, 163, 224, 0.4);
+            animation: heartbeat 1.4s ease-in-out infinite;
+        }
+
+        .splash-text {
+            margin-top: 20px;
+            font-size: 12px;
+            font-weight: 800;
+            color: var(--accent-blue);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        @keyframes heartbeat {
+            0% {
+                transform: scale(1);
+                box-shadow: 0 0 15px rgba(0, 163, 224, 0.3);
+            }
+            50% {
+                transform: scale(1.08);
+                box-shadow: 0 0 30px rgba(0, 163, 224, 0.6);
+            }
+            100% {
+                transform: scale(1);
+                box-shadow: 0 0 15px rgba(0, 163, 224, 0.3);
+            }
+        }
+
         .container {
             width: 100%;
             max-width: 480px;
@@ -65,19 +114,23 @@
         }
 
         .logo-badge {
-            background-color: var(--accent-blue);
-            color: #fff;
-            font-weight: 800;
+            background-color: transparent;
             width: 40px;
             height: 40px;
             border-radius: 9px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 20px;
-            box-shadow: 0 3px 10px rgba(0, 163, 224, 0.4);
             cursor: pointer;
             user-select: none;
+            overflow: hidden;
+        }
+
+        .logo-badge img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 9px;
         }
 
         .app-title h1 {
@@ -112,22 +165,6 @@
         }
         .top-mode-btn.active {
             display: inline-block;
-        }
-
-        /* Spinner de carga animado */
-        .spinner {
-            width: 32px;
-            height: 32px;
-            border: 3px solid rgba(0, 163, 224, 0.2);
-            border-top: 3px solid var(--accent-blue);
-            border-radius: 50%;
-            animation: spin 0.8s linear infinite;
-            margin: 0 auto 12px auto;
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
         }
 
         /* Selector de días */
@@ -472,10 +509,18 @@
     </style>
 </head>
 <body>
+    <!-- PANTALLA DE CARGA CON LOGO QUE LATE -->
+    <div id="splash-screen">
+        <img src="icon.png" alt="Logo" class="splash-logo">
+        <div class="splash-text">Cargando datos...</div>
+    </div>
+
     <div class="container">
         <header>
             <div class="brand">
-                <div class="logo-badge" onclick="handleLogoClick()" title="Tocar 5 veces para contraseña">P</div>
+                <div class="logo-badge" onclick="handleLogoClick()" title="Tocar 5 veces para contraseña">
+                    <img src="icon.png" alt="Logo">
+                </div>
                 <div class="app-title">
                     <h1>GUARDIA SIERRAS CHICAS</h1>
                     <p>Supervisores</p>
@@ -487,12 +532,12 @@
 
         <!-- SELECTOR DE DÍAS -->
         <div id="dateNavigator" class="date-navigator" style="display: none;">
-            <button class="nav-arrow" onclick="navigate(-1)">&#10094;</button>
+            <button class="nav-arrow" id="btnPrev" onclick="navigate(-1)">&#10094;</button>
             <div class="current-date-display">
                 <div class="main-label" id="lblRangoFechas">Fecha</div>
                 <div class="sub-label" id="lblSubSemana">Modo técnico</div>
             </div>
-            <button class="nav-arrow" onclick="navigate(1)">&#10095;</button>
+            <button class="nav-arrow" id="btnNext" onclick="navigate(1)">&#10095;</button>
         </div>
 
         <!-- CONTENEDOR DINÁMICO -->
@@ -528,19 +573,11 @@
         let isAuthorized = false; 
         let isSupervisorMode = false; 
         let pClickCount = 0;
+        let originalTodayIndex = 0;
 
         async function loadSheetData() {
-            document.getElementById('dateNavigator').style.display = "none";
-            document.getElementById('appContainer').innerHTML = `
-                <div style="text-align:center; padding:50px 20px; color:var(--accent-blue);">
-                    <div class="spinner"></div>
-                    <div style="font-size:14px; font-weight:800; margin-bottom:6px; text-transform:uppercase; letter-spacing:0.5px;">Tomando datos en vivo</div>
-                    <div style="font-size:11px; color:var(--text-muted);">Aguarde por favor...</div>
-                </div>
-            `;
-
             let fetchPromise = fetch(API_URL, { redirect: "follow" }).then(res => res.json());
-            let timerPromise = new Promise(resolve => setTimeout(resolve, 2000)); // Reducido a 2 segundos exactos
+            let timerPromise = new Promise(resolve => setTimeout(resolve, 1500));
 
             try {
                 const [rows] = await Promise.all([fetchPromise, timerPromise]);
@@ -554,13 +591,26 @@
                     } else {
                         currentIndex = 0;
                     }
+                    originalTodayIndex = currentIndex;
                     baseWeekDate = new Date();
                 }
                 renderApp();
+                hideSplashScreen();
             } catch (error) {
                 console.error("Error al procesar datos:", error);
                 document.getElementById('appContainer').innerHTML = 
                     `<div style="text-align:center; padding:15px; color:#f87171; font-size:11px;">Error al procesar datos del Google Sheet.</div>`;
+                hideSplashScreen();
+            }
+        }
+
+        function hideSplashScreen() {
+            const splash = document.getElementById('splash-screen');
+            if (splash) {
+                splash.style.opacity = '0';
+                setTimeout(() => {
+                    splash.style.display = 'none';
+                }, 500);
             }
         }
 
@@ -680,20 +730,17 @@
             if (isSupervisorMode) {
                 baseWeekDate.setDate(baseWeekDate.getDate() + (direction * 7));
             } else {
-                let currentItem = availableDates[currentIndex];
-                if (currentItem) {
-                    let dParts = currentItem.dateStr.split('-');
-                    let d = new Date(dParts[0], dParts[1] - 1, dParts[2]);
-                    d.setDate(d.getDate() + direction);
-                    let targetKey = formatDateKey(d);
-                    let foundIdx = availableDates.findIndex(item => item.dateStr === targetKey);
-                    if (foundIdx !== -1) {
-                        currentIndex = foundIdx;
-                    } else {
-                        currentIndex += direction;
-                        if (currentIndex < 0) currentIndex = 0;
-                        if (currentIndex >= availableDates.length) currentIndex = availableDates.length - 1;
-                    }
+                if (isAuthorized) {
+                    // Si ya ingresó la clave, en modo técnico navega libremente por los días del excel
+                    currentIndex += direction;
+                    if (currentIndex < 0) currentIndex = 0;
+                    if (currentIndex >= availableDates.length) currentIndex = availableDates.length - 1;
+                } else {
+                    // Sin clave: limitado a avanzar solo 1 día (del viernes al sábado)
+                    let newIndex = currentIndex + direction;
+                    if (newIndex < originalTodayIndex) newIndex = originalTodayIndex;
+                    if (newIndex > originalTodayIndex + 1) newIndex = originalTodayIndex + 1;
+                    currentIndex = newIndex;
                 }
             }
             renderApp();
@@ -783,6 +830,8 @@
 
             if (isSupervisorMode) {
                 navBar.style.display = "flex";
+                document.getElementById('btnPrev').style.visibility = "visible";
+                document.getElementById('btnNext').style.visibility = "visible";
                 document.getElementById('lblRangoFechas').innerText = `MODO SUPERVISOR (SEMANA)`;
                 document.getElementById('lblSubSemana').innerText = `Auditoría activa`;
                 
@@ -833,14 +882,12 @@
             } else {
                 // MODO TÉCNICO
                 if (daysArr.length > 1) {
-                    if (isAuthorized) {
-                        navBar.style.display = "flex";
-                        let currentItem = availableDates[currentIndex];
-                        document.getElementById('lblRangoFechas').innerText = currentItem ? `${currentItem.dayNum} ${currentItem.monthName}` : "FECHA";
-                        document.getElementById('lblSubSemana').innerText = `Bloque fin de semana / Guardia`;
-                    } else {
-                        navBar.style.display = "none";
-                    }
+                    navBar.style.display = "flex";
+                    document.getElementById('btnPrev').style.visibility = "visible";
+                    document.getElementById('btnNext').style.visibility = "visible";
+                    let currentItem = availableDates[currentIndex];
+                    document.getElementById('lblRangoFechas').innerText = currentItem ? `${currentItem.dayNum} ${currentItem.monthName}` : "FECHA";
+                    document.getElementById('lblSubSemana').innerText = `Bloque fin de semana / Guardia`;
 
                     let supervisorSchedules = {};
 
@@ -965,14 +1012,21 @@
                     }
 
                 } else {
+                    // Modo técnico de un solo día
+                    navBar.style.display = "flex";
+                    
+                    // Si está autorizado con clave, las flechas están siempre visibles y libres; si no, aplica el límite de 1 día
                     if (isAuthorized) {
-                        navBar.style.display = "flex";
-                        let currentItem = availableDates[currentIndex];
-                        document.getElementById('lblRangoFechas').innerText = currentItem ? `${currentItem.dayNum} ${currentItem.monthName}` : "FECHA";
-                        document.getElementById('lblSubSemana').innerText = `Modo técnico`;
+                        document.getElementById('btnPrev').style.visibility = "visible";
+                        document.getElementById('btnNext').style.visibility = "visible";
                     } else {
-                        navBar.style.display = "none";
+                        document.getElementById('btnPrev').style.visibility = (currentIndex > originalTodayIndex) ? "visible" : "hidden";
+                        document.getElementById('btnNext').style.visibility = (currentIndex < originalTodayIndex + 1) ? "visible" : "hidden";
                     }
+
+                    let currentItem = availableDates[currentIndex];
+                    document.getElementById('lblRangoFechas').innerText = currentItem ? `${currentItem.dayNum} ${currentItem.monthName}` : "FECHA";
+                    document.getElementById('lblSubSemana').innerText = isAuthorized ? `Modo técnico (Autorizado)` : `Modo técnico (Día actual)`;
 
                     let targetDateStr = daysArr[0];
                     let activeGuardSupervisor = null;
