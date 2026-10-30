@@ -491,14 +491,14 @@
             <button id="topModeBtn" class="top-mode-btn" onclick="toggleViewMode()">SUP</button>
         </header>
 
-        <!-- SELECTOR DE DÍAS -->
-        <div id="dateNavigator" class="date-navigator" style="display: none;">
-            <button class="nav-arrow" onclick="navigate(-1)">&#10094;</button>
+        <!-- SELECTOR DE DÍAS (Siempre presente en el DOM para la lógica) -->
+        <div id="dateNavigator" class="date-navigator">
+            <button id="navLeftBtn" class="nav-arrow" onclick="navigate(-1)">&#10094;</button>
             <div class="current-date-display">
                 <div class="main-label" id="lblRangoFechas">Fecha</div>
                 <div class="sub-label" id="lblSubSemana">Modo técnico</div>
             </div>
-            <button class="nav-arrow" onclick="navigate(1)">&#10095;</button>
+            <button id="navRightBtn" class="nav-arrow" onclick="navigate(1)">&#10095;</button>
         </div>
 
         <!-- CONTENEDOR DINÁMICO -->
@@ -536,7 +536,6 @@
         let pClickCount = 0;
 
         async function loadSheetData() {
-            document.getElementById('dateNavigator').style.display = "none";
             document.getElementById('appContainer').innerHTML = `
                 <div style="text-align:center; padding:50px 20px; color:var(--accent-blue);">
                     <div class="spinner"></div>
@@ -778,26 +777,31 @@
         }
 
         function renderApp() {
-            if (availableDates.length === 0) {
-                document.getElementById('appContainer').innerHTML = `
-                    <div style="text-align:center; padding:30px; color:#f87171; font-size:12px;">
-                        No se pudieron cargar o reconocer las fechas desde el Google Sheet. Verifique las columnas de la planilla.
-                    </div>
-                `;
-                return;
-            }
+            if (availableDates.length === 0) return;
 
             let daysArr = getDaysToDisplay();
             const container = document.getElementById('appContainer');
             const navBar = document.getElementById('dateNavigator');
             let topModeBtn = document.getElementById('topModeBtn');
+            let leftBtn = document.getElementById('navLeftBtn');
+            let rightBtn = document.getElementById('navRightBtn');
 
             if (isSupervisorMode) {
                 topModeBtn.innerText = "TEC";
                 topModeBtn.title = "Cambiar a Modo Técnico";
+                leftBtn.style.display = "flex";
+                rightBtn.style.display = "flex";
             } else {
                 topModeBtn.innerText = "SUP";
                 topModeBtn.title = "Cambiar a Modo Supervisor";
+                // Si no hay clave, ocultamos las flechas de deslizamiento en modo técnico pero mostramos la barra de fecha
+                if (!isAuthorized) {
+                    leftBtn.style.display = "none";
+                    rightBtn.style.display = "none";
+                } else {
+                    leftBtn.style.display = "flex";
+                    rightBtn.style.display = "flex";
+                }
             }
 
             if (isSupervisorMode) {
@@ -852,14 +856,10 @@
             } else {
                 // MODO TÉCNICO
                 if (daysArr.length > 1) {
-                    if (isAuthorized) {
-                        navBar.style.display = "flex";
-                        let currentItem = availableDates[currentIndex];
-                        document.getElementById('lblRangoFechas').innerText = currentItem ? `${currentItem.dayNum} ${currentItem.monthName}` : "FECHA";
-                        document.getElementById('lblSubSemana').innerText = `Bloque fin de semana / Guardia`;
-                    } else {
-                        navBar.style.display = "none";
-                    }
+                    navBar.style.display = "flex";
+                    let currentItem = availableDates[currentIndex];
+                    document.getElementById('lblRangoFechas').innerText = currentItem ? `${currentItem.dayNum} ${currentItem.monthName}` : "FECHA";
+                    document.getElementById('lblSubSemana').innerText = `Bloque fin de semana / Guardia`;
 
                     let supervisorSchedules = {};
 
@@ -984,14 +984,10 @@
                     }
 
                 } else {
-                    if (isAuthorized) {
-                        navBar.style.display = "flex";
-                        let currentItem = availableDates[currentIndex];
-                        document.getElementById('lblRangoFechas').innerText = currentItem ? `${currentItem.dayNum} ${currentItem.monthName}` : "FECHA";
-                        document.getElementById('lblSubSemana').innerText = `Modo técnico`;
-                    } else {
-                        navBar.style.display = "none";
-                    }
+                    navBar.style.display = "flex";
+                    let currentItem = availableDates[currentIndex];
+                    document.getElementById('lblRangoFechas').innerText = currentItem ? `${currentItem.dayNum} ${currentItem.monthName}` : "FECHA";
+                    document.getElementById('lblSubSemana').innerText = `Modo técnico`;
 
                     let targetDateStr = daysArr[0];
                     let activeGuardSupervisor = null;
