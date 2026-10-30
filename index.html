@@ -120,7 +120,7 @@
             display: inline-block;
         }
 
-        /* Spinner de carga animado */
+        /* Spinner de carga */
         .spinner {
             width: 32px;
             height: 32px;
@@ -187,7 +187,7 @@
             margin-top: 1px;
         }
 
-        /* Tarjeta imponente estilo Placa Informativa para Guardia */
+        /* Placas */
         .guard-plaque-card {
             background: var(--corp-plaque-bg);
             border: 2px solid var(--corp-plaque-border);
@@ -260,21 +260,7 @@
             text-transform: uppercase;
         }
 
-        .plaque-shift-badge-inline {
-            background: var(--corp-badge-bg);
-            color: var(--corp-badge-text);
-            border: 1px solid rgba(0, 163, 224, 0.5);
-            font-size: 11px;
-            font-weight: 900;
-            padding: 5px;
-            border-radius: 6px;
-            margin: 0 auto 8px auto;
-            letter-spacing: 1px;
-            text-transform: uppercase;
-            width: 100%;
-        }
-
-        .admin-time-badge-inline {
+        .plaque-shift-badge-inline, .admin-time-badge-inline {
             background: var(--corp-badge-bg);
             color: var(--corp-badge-text);
             border: 1px solid rgba(0, 163, 224, 0.5);
@@ -354,7 +340,6 @@
             height: 15px;
         }
 
-        /* Cuadro unificado normal */
         .unified-card {
             background: var(--card-bg);
             border: 1px solid var(--card-border);
@@ -462,7 +447,6 @@
             border-right: none;
         }
 
-        /* Estilos de turnos */
         .badge-am { background: var(--am-bg); color: var(--am-text); border: 1px solid rgba(56, 189, 248, 0.35); }
         .badge-pm { background: var(--pm-bg); color: var(--pm-text); border: 1px solid rgba(251, 191, 36, 0.35); }
         .badge-guardia { background: var(--guardia-bg); color: var(--guardia-text); border: 1px solid rgba(248, 113, 113, 0.35); font-size: 9px; line-height: 1.15; }
@@ -487,15 +471,14 @@
                     <p>Supervisores</p>
                 </div>
             </div>
-            <!-- BOTÓN TEC / SUP ARRIBA A LA DERECHA -->
             <button id="topModeBtn" class="top-mode-btn" onclick="toggleViewMode()">SUP</button>
         </header>
 
-        <!-- SELECTOR DE DÍAS (Siempre presente en el DOM para la lógica) -->
+        <!-- SELECTOR DE DÍAS -->
         <div id="dateNavigator" class="date-navigator">
             <button id="navLeftBtn" class="nav-arrow" onclick="navigate(-1)">&#10094;</button>
             <div class="current-date-display">
-                <div class="main-label" id="lblRangoFechas">Fecha</div>
+                <div class="main-label" id="lblRangoFechas">FECHA</div>
                 <div class="sub-label" id="lblSubSemana">Modo técnico</div>
             </div>
             <button id="navRightBtn" class="nav-arrow" onclick="navigate(1)">&#10095;</button>
@@ -544,11 +527,9 @@
                 </div>
             `;
 
-            let fetchPromise = fetch(API_URL, { redirect: "follow" }).then(res => res.json());
-            let timerPromise = new Promise(resolve => setTimeout(resolve, 2000));
-
             try {
-                const [rows] = await Promise.all([fetchPromise, timerPromise]);
+                const response = await fetch(API_URL, { redirect: "follow" });
+                const rows = await response.json();
                 parseSheetRows(rows);
                 
                 if (availableDates.length > 0) {
@@ -566,7 +547,7 @@
                 console.error("Error al procesar datos:", error);
                 document.getElementById('appContainer').innerHTML = `
                     <div style="text-align:center; padding:20px; color:#f87171; font-size:11px;">
-                        Error al procesar datos del Google Sheet.<br>Verifique la conexión o el formato de las columnas.
+                        Error al procesar datos del Google Sheet. Verifique la conexión.
                     </div>
                 `;
             }
@@ -781,7 +762,6 @@
 
             let daysArr = getDaysToDisplay();
             const container = document.getElementById('appContainer');
-            const navBar = document.getElementById('dateNavigator');
             let topModeBtn = document.getElementById('topModeBtn');
             let leftBtn = document.getElementById('navLeftBtn');
             let rightBtn = document.getElementById('navRightBtn');
@@ -794,7 +774,6 @@
             } else {
                 topModeBtn.innerText = "SUP";
                 topModeBtn.title = "Cambiar a Modo Supervisor";
-                // Si no hay clave, ocultamos las flechas de deslizamiento en modo técnico pero mostramos la barra de fecha
                 if (!isAuthorized) {
                     leftBtn.style.display = "none";
                     rightBtn.style.display = "none";
@@ -805,7 +784,6 @@
             }
 
             if (isSupervisorMode) {
-                navBar.style.display = "flex";
                 document.getElementById('lblRangoFechas').innerText = `MODO SUPERVISOR (SEMANA)`;
                 document.getElementById('lblSubSemana').innerText = `Auditoría activa`;
                 
@@ -856,7 +834,6 @@
             } else {
                 // MODO TÉCNICO
                 if (daysArr.length > 1) {
-                    navBar.style.display = "flex";
                     let currentItem = availableDates[currentIndex];
                     document.getElementById('lblRangoFechas').innerText = currentItem ? `${currentItem.dayNum} ${currentItem.monthName}` : "FECHA";
                     document.getElementById('lblSubSemana').innerText = `Bloque fin de semana / Guardia`;
@@ -984,7 +961,6 @@
                     }
 
                 } else {
-                    navBar.style.display = "flex";
                     let currentItem = availableDates[currentIndex];
                     document.getElementById('lblRangoFechas').innerText = currentItem ? `${currentItem.dayNum} ${currentItem.monthName}` : "FECHA";
                     document.getElementById('lblSubSemana').innerText = `Modo técnico`;
