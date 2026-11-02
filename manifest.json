@@ -1,0 +1,23 @@
+{
+  "name": "Guardia Supervisores - Sierras Chicas",
+  "short_name": "Guardia SC",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#070d19",
+  "theme_color": "#070d19",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "icon.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icon.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
