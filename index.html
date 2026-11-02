@@ -4,6 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Guardia Supervisores - Sierras Chicas</title>
+    
+    <!-- ÍCONOS Y CONFIGURACIÓN PARA ACCESO DIRECTO EN EL ESCRITORIO -->
+    <link rel="icon" type="image/png" href="icon.png">
+    <link rel="apple-touch-icon" href="icon.png">
+    <meta name="theme-color" content="#070d19">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
     <style>
         :root {
             --bg-color: #070d19;
@@ -1010,7 +1018,7 @@
                     }
 
                 } else {
-                    // Modo técnico de un solo día
+                    // Modo técnico de un solo día (Día hábil normal sin G)
                     navBar.style.display = "flex";
                     
                     if (isAuthorized) {
@@ -1076,12 +1084,12 @@
                         container.innerHTML = plaqueHtml;
                     } else {
                         let activeTechSupervisors = supervisorsList.filter(sup => {
-                            let dayData = rawSchedule[daysArr[0]] || {};
+                            let dayData = rawSchedule[targetDateStr] || {};
                             let val = dayData[sup.key] ? String(dayData[sup.key]).trim() : "";
                             return val !== "" && val !== "FC" && val !== "VAC";
                         });
 
-                        let foundObj = availableDates.find(d => d.dateStr === daysArr[0]);
+                        let foundObj = availableDates.find(d => d.dateStr === targetDateStr);
                         let dayNameText = foundObj ? foundObj.dayName : "";
                         let dayNumText = foundObj ? foundObj.dayNum : "";
                         let monthText = foundObj ? foundObj.monthName : "";
