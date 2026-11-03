@@ -636,7 +636,7 @@
                     let normalized = parseAnyDate(h);
                     if (normalized) {
                         let parsedObj = parseDateDetails(normalized);
-                        availableDates.push({ colIndex: c, dateStr: normalized, dayNum: parsedObj.dayNum, monthName: parsedObj.monthName, dayName: parsedObj.dayName });
+                        availableDates.push({ colIndex: c, dateStr: normalized, dayNum: parsedObj.dayNum, monthName: parsedObj.monthName, dayName: parsedObj.dayName, shortDay: parsedObj.shortDay });
                     }
                 }
             }
@@ -676,8 +676,14 @@
             let year = p[0], month = p[1], day = p[2];
             let dObj = new Date(year, month - 1, day);
             const daysNames = ['DOMINGO', 'LUNES', 'MARTES', 'MIÉRCOLES', 'JUEVES', 'VIERNES', 'SÁBADO'];
+            const shortDays = ['do', 'lu', 'ma', 'mi', 'ju', 'vi', 'sa'];
             const months = { '01': 'ENE', '02': 'FEB', '03': 'MAR', '04': 'ABR', '05': 'MAY', '06': 'JUN', '07': 'JUL', '08': 'AGO', '09': 'SEP', '10': 'OCT', '11': 'NOV', '12': 'DIC' };
-            return { dayNum: parseInt(day), monthName: months[month] || month, dayName: daysNames[dObj.getDay()] };
+            return { 
+                dayNum: parseInt(day), 
+                monthName: months[month] || month, 
+                dayName: daysNames[dObj.getDay()],
+                shortDay: shortDays[dObj.getDay()]
+            };
         }
 
         function parseAnyDate(str) {
@@ -852,7 +858,7 @@
                 daysArr.forEach((dateStr) => {
                     let foundObj = availableDates.find(d => d.dateStr === dateStr);
                     if (foundObj) {
-                        html += `<div><span style="font-size:8px; color:var(--text-muted); display:block;">${foundObj.monthName}</span><span style="font-size:11px; font-weight:800;">${foundObj.dayNum}</span></div>`;
+                        html += `<div><span style="font-size:8px; color:var(--accent-blue); display:block; font-weight:800; text-transform:uppercase;">${foundObj.shortDay}</span><span style="font-size:7px; color:var(--text-muted); display:block;">${foundObj.monthName}</span><span style="font-size:11px; font-weight:800;">${foundObj.dayNum}</span></div>`;
                     } else {
                         html += `<div><span>${dateStr}</span></div>`;
                     }
